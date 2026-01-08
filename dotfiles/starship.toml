@@ -1,0 +1,65 @@
+format = """
+[](bg:#000000 fg:#78FF00)\
+[   ](bg:#78FF00 fg:#000000 bold)\
+[](fg:#78FF00 bg:#013756)\
+$time\
+[](fg:#013756 bg:#78FF00)\
+$directory\
+[](fg:#78FF00 bg:#013756)\
+$git_branch\
+$git_status\
+$git_metrics\
+[](fg:#013756 bg:#000000)\
+\n$character
+"""
+
+right_format = """
+$python
+""" 
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:#013756 fg:#ffffff"
+format = '[ 󱑓 $time ]($style)'
+
+[directory]
+format = "[  $path ]($style)"
+style = "bg:#78FF00 fg:#000000 bold "
+truncation_length = 3
+
+[git_branch]
+symbol = "  "
+format = '[ $symbol$branch(:$remote_branch) ]($style)'
+style = "fg:#78FF00 bg:#013756"
+
+[git_status]
+format = '[$all_status]($style)'
+style = "fg:#78FF00 bg:#013756"
+
+[git_metrics]
+format = "([+$added]($added_style))([- $deleted]($deleted_style))"
+added_style = "fg:#78FF00 bg:#013756"
+deleted_style = "fg:red bg:#013756"
+disabled = false
+
+[hg_branch]
+format = "[ $symbol$branch ]($style)"
+symbol = " "
+style = "bg:#78FF00 fg:#061115"
+
+[cmd_duration]
+min_time = 500
+format = "[ 󱑓 $duration ]($style)"
+style = "fg:#78FF00 bg:#061115"
+
+[character]
+success_symbol = '[ 󰚺](bold fg:#78FF00)'
+error_symbol = '[ 󰚺](bold fg:red)'
+vicmd_symbol = '[ V ](bold fg:#FFCB6B)'
+
+[python]
+symbol = " "
+format = "[$symbol($virtualenv)]($style)"
+style = "fg:#78FF00 bold"
+
