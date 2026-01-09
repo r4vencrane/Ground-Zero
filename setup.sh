@@ -1,118 +1,104 @@
 #!/bin/bash
 
-# --- PREPARACIÓN DEL ENTORNO ---
-set -e  # Salir si hay error
+# --- 1. PREPARACIÓN ---
+set -e  # Si algo falla, el script se detiene (seguridad)
 
-# Obtenemos la ruta absoluta de donde está este script
-# Esto permite correr el script desde cualquier lado sin romper las rutas
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BUILD_DIR="$REPO_DIR/build"
+# Verificamos que estás en la carpeta correcta
+if [ ! -f "setup.sh" ]; then
+    echo "[!] ERROR: Ejecuta este script dentro de la carpeta 'Ground-Zero'"
+    exit 1
+fi
 
-echo "[+] Iniciando instalación desde: $REPO_DIR"
+echo "[*] Iniciando instalación de Ground-Zero..."
 
-# Crear carpeta temporal para descargas y compilación (se ignora en git)
-mkdir -p "$BUILD_DIR"
+# Creamos una carpeta temporal "build" para descargar y compilar cosas
+# (Es como una mesa de trabajo que luego limpiaremos)
+rm -rf build && mkdir build
 
-# --- ACTUALIZACIÓN ---
-echo "[*] Actualizando sistema..."
-sudo apt update 
-
-# --- DEPENDENCIAS ---
-echo "[*] Instalando dependencias..."
+# --- 2. INSTALAR DEPENDENCIAS (Todo en uno) ---
+echo "[*] Instalando paquetes del sistema..."
+sudo apt update
 sudo apt install -y build-essential git vim xcb libasound2-dev \
-libxcb-util0-dev libxcb-ewmh-dev libxcb-randr0-dev \
-libxcb-icccm4-dev libxcb-keysyms1-dev libxcb-xinerama0-dev \
-libxcb-xtest0-dev libxcb-shape0-dev libxcb-xkb-dev polybar \
-kali-community-wallpapers kali-wallpapers-all
-
-sudo apt install kitty rofi feh xclip scrot flameshot -y 
-
-
-# --- COMPILACIÓN (Usando la carpeta build) ---
-
-# 1. BSPWM
-if ! command -v bspwm &> /dev/null; then
-    echo "[*] Compilando BSPWM..."
-    cd "$BUILD_DIR"
-    git clone https://github.com/baskerville/bspwm.git
-    cd bspwm
-    make
-    sudo make install
-    sudo cp contrib/freedesktop/bspwm.desktop /usr/share/xsessions/
-else
-    echo "[!] BSPWM ya está instalado."
-fi
-
-# 2. SXHKD
-if ! command -v sxhkd &> /dev/null; then
-    echo "[*] Compilando SXHKD..."
-    cd "$BUILD_DIR"
-    git clone https://github.com/baskerville/sxhkd.git
-    cd sxhkd
-    make
-    sudo make install
-else
-    echo "[!] SXHKD ya está instalado."
-fi
-
-# 3. PICOM
-if ! command -v picom &> /dev/null; then
-    echo "[*] Instalando deps y compilando PICOM..."
-    # (Aquí pones todas las deps de picom que tenías antes)
-    sudo apt install -y libconfig-dev libdbus-1-dev libegl-dev libev-dev \
-    libgl-dev libepoxy-dev libpcre2-dev libpixman-1-dev libx11-xcb-dev \
+    libxcb-util0-dev libxcb-ewmh-dev libxcb-randr0-dev \
+    libxcb-icccm4-dev libxcb-keysyms1-dev libxcb-xinerama0-dev \
+    libxcb-xtest0-dev libxcb-shape0-dev libxcb-xkb-dev \
+    libconfig-dev libdbus-1-dev libegl-dev libev-dev libgl-dev \
+    libepoxy-dev libpcre2-dev libpixman-1-dev libx11-xcb-dev \
     libxcb1-dev libxcb-composite0-dev libxcb-damage0-dev libxcb-glx0-dev \
-    libxcb-image0-dev libxcb-present-dev libxcb-randr0-dev libxcb-render0-dev \
-    libxcb-render-util0-dev libxcb-shape0-dev libxcb-util-dev libxcb-xfixes0-dev \
-    meson ninja-build uthash-dev
+    libxcb-image0-dev libxcb-present-dev libxcb-render0-dev \
+    libxcb-render-util0-dev libxcb-util-dev libxcb-xfixes0-dev \
+    meson ninja-build uthash-dev \
+    polybar kali-community-wallpapers kali-wallpapers-all \
+    kitty rofi feh xclip scrot flameshot
 
-    cd "$BUILD_DIR"
-    git clone https://github.com/yshui/picom.git
-    cd picom
-    meson setup --buildtype=release build
-    ninja -C build
-    sudo ninja -C build install
-else
-    echo "[!] Picom ya está instalado."
-fi
+# --- 3. COMPILACIÓN (BSPWM, SXHKD, PICOM) ---
+# Entramos a la carpeta de trabajo
+cd build
 
-# --- INSTALACIÓN DE DOTFILES (La parte clave) ---
-echo "[*] Copiando tus configuraciones..."
+echo "[*] Compilando e instalando BSPWM..."
+git clone https://github.com/baskerville/bspwm.git
+make -C bspwm
+sudo make -C bspwm install
+sudo cp bspwm/contrib/freedesktop/bspwm.desktop /usr/share/xsessions/
 
-# Volvemos a la raíz del repo por seguridad
-cd "$REPO_DIR"
+echo "[*] Compilando e instalando SXHKD..."
+git clone https://github.com/baskerville/sxhkd.git
+make -C sxhkd
+sudo make -C sxhkd install
 
-# Copiamos Fuentes
-if [ -d "$REPO_DIR/assets/fonts" ]; then
-    echo "  -> Instalando fuentes..."
-    mkdir -p ~/.local/share/fonts
-    cp -r "$REPO_DIR/assets/fonts/"* ~/.local/share/fonts/
-    fc-cache -fv
-fi
+echo "[*] Compilando e instalando PICOM (Animaciones)..."
+git clone https://github.com/yshui/picom.git
+cd picom
+meson setup --buildtype=release build
+ninja -C build
+sudo ninja -C build install
+cd ../.. # Volvemos a la raiz de Ground-Zero
 
-# Copiamos Configs (BSPWM, Polybar, etc.)
-# Esto toma lo que está en tu carpeta 'dotfiles' y lo pone en ~/.config
-# Usamos un bucle para hacerlo limpio
-for config in bspwm sxhkd polybar picom kitty rofi; do
-    if [ -d "$REPO_DIR/dotfiles/$config" ]; then
-        echo "  -> Copiando config de $config..."
-        # Borra la config vieja si existe para evitar conflictos (opcional pero recomendado)
-        rm -rf ~/.config/$config
-        cp -r "$REPO_DIR/dotfiles/$config" ~/.config/
-    fi
-done
+# --- 4. INSTALACIÓN DE DOTFILES (CONFIGURACIONES) ---
+echo "[*] Copiando configuraciones..."
 
-# Permisos de ejecución para scripts internos de bspwm
-cd
-cp -r /Ground-Zero/dotfiles/scripts ~/.config
-cp -r /Ground-Zero/dotfiles/bin ~/.config
-cp -r /Ground-Zero/assets/wallpapers ~/.config
-chmod +x ~/.config/bspwm/bspwmrc 
+# Fuentes (Fonts)
+mkdir -p ~/.local/share/fonts
+cp -r assets/fonts/* ~/.local/share/fonts/
+fc-cache -fv
 
+# Directorios de configuración básicos
+mkdir -p ~/.config
 
-# --- LIMPIEZA ---
-echo "[*] Limpiando archivos temporales..."
-rm -rf "$BUILD_DIR"
+# Copiamos carpetas enteras de config
+# Nota: Usamos 'cp -r' para copiar recursivamente
+cp -r dotfiles/bspwm ~/.config/
+cp -r dotfiles/sxhkd ~/.config/
+cp -r dotfiles/polybar ~/.config/
+cp -r dotfiles/kitty ~/.config/
+cp -r dotfiles/rofi ~/.config/
 
-echo "[+] ¡INSTALACIÓN COMPLETADA!"
-echo "    Por favor reinicia el sistema."
+# CONFIGURACIÓN ESPECIAL DE PICOM
+# Vi que tienes código fuente dentro de dotfiles/picom, eso NO debe ir a .config
+# Solo copiamos el archivo de configuración
+mkdir -p ~/.config/picom
+cp dotfiles/picom/picom.conf ~/.config/picom/
+
+# Archivos sueltos (zshrc y starship)
+cp dotfiles/zshrc ~/.zshrc
+cp dotfiles/starship.toml ~/.config/starship.toml
+
+# Scripts y Binarios
+cp -r dotfiles/scripts ~/.config/
+cp -r dotfiles/bin ~/.config/
+
+# Wallpapers
+mkdir -p ~/.config/wallpapers
+cp -r assets/wallpapers/* ~/.config/wallpapers/
+
+# Permisos de ejecución
+chmod +x ~/.config/bspwm/bspwmrc
+chmod +x ~/.config/polybar/launch.sh
+chmod +x ~/.config/scripts/*
+chmod +x ~/.config/bin/*
+
+# --- 5. LIMPIEZA ---
+echo "[*] Limpiando basura..."
+rm -rf build
+
+echo "[+] ¡INSTALACIÓN COMPLETADA! Reinicia tu equipo."
