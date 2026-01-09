@@ -1,27 +1,26 @@
 #!/bin/bash
 
 # --- 1. PREPARACIÓN ---
-set -e  # Si algo falla, el script se detiene (seguridad)
+set -e  # Abortar si hay errores
 
-# Verificamos que estás en la carpeta correcta
 if [ ! -f "setup.sh" ]; then
-    echo "[!] ERROR: Ejecuta este script dentro de la carpeta 'Ground-Zero'"
+    echo "[!] ERROR: Ejecuta este script desde la carpeta 'Ground-Zero'"
     exit 1
 fi
 
-echo "[*] Iniciando instalación de Ground-Zero..."
+echo "[*] Iniciando instalación de Ground-Zero (BSPWM + Terminal Aesthetics)..."
 
-# Creamos una carpeta temporal "build" para descargar y compilar cosas
-# (Es como una mesa de trabajo que luego limpiaremos)
+# Limpieza y creación de entorno de trabajo
 rm -rf build && mkdir build
 
-# --- 2. INSTALAR DEPENDENCIAS (Todo en uno) ---
+# --- 2. INSTALAR PAQUETES Y DEPENDENCIAS ---
 echo "[*] Instalando paquetes del sistema..."
 sudo apt update
-sudo apt install -y build-essential git vim xcb libasound2-dev \
-    libxcb-util0-dev libxcb-ewmh-dev libxcb-randr0-dev \
-    libxcb-icccm4-dev libxcb-keysyms1-dev libxcb-xinerama0-dev \
-    libxcb-xtest0-dev libxcb-shape0-dev libxcb-xkb-dev \
+sudo apt install -y \
+    build-essential git vim curl wget unzip \
+    xcb libasound2-dev libxcb-util0-dev libxcb-ewmh-dev \
+    libxcb-randr0-dev libxcb-icccm4-dev libxcb-keysyms1-dev \
+    libxcb-xinerama0-dev libxcb-xtest0-dev libxcb-shape0-dev libxcb-xkb-dev \
     libconfig-dev libdbus-1-dev libegl-dev libev-dev libgl-dev \
     libepoxy-dev libpcre2-dev libpixman-1-dev libx11-xcb-dev \
     libxcb1-dev libxcb-composite0-dev libxcb-damage0-dev libxcb-glx0-dev \
@@ -29,76 +28,108 @@ sudo apt install -y build-essential git vim xcb libasound2-dev \
     libxcb-render-util0-dev libxcb-util-dev libxcb-xfixes0-dev \
     meson ninja-build uthash-dev \
     polybar kali-community-wallpapers kali-wallpapers-all \
-    kitty rofi feh xclip scrot flameshot
+    kitty rofi feh xclip scrot flameshot \
+    zsh bat lsd neofetch  # Agregados para la terminal
 
-# --- 3. COMPILACIÓN (BSPWM, SXHKD, PICOM) ---
-# Entramos a la carpeta de trabajo
+# --- 3. COMPILACIÓN DE ENTORNO GRÁFICO ---
 cd build
 
-echo "[*] Compilando e instalando BSPWM..."
+echo "[*] Compilando BSPWM..."
 git clone https://github.com/baskerville/bspwm.git
 make -C bspwm
 sudo make -C bspwm install
 sudo cp bspwm/contrib/freedesktop/bspwm.desktop /usr/share/xsessions/
 
-echo "[*] Compilando e instalando SXHKD..."
+echo "[*] Compilando SXHKD..."
 git clone https://github.com/baskerville/sxhkd.git
 make -C sxhkd
 sudo make -C sxhkd install
 
-echo "[*] Compilando e instalando PICOM (Animaciones)..."
+echo "[*] Compilando PICOM..."
 git clone https://github.com/yshui/picom.git
 cd picom
 meson setup --buildtype=release build
 ninja -C build
 sudo ninja -C build install
-cd ../.. # Volvemos a la raiz de Ground-Zero
+cd ../.. # Volver a la raíz
 
-# --- 4. INSTALACIÓN DE DOTFILES (CONFIGURACIONES) ---
-echo "[*] Copiando configuraciones..."
+# --- 4. ESTÉTICA DE TERMINAL (ZSH & STARSHIP) ---
+echo "[*] Configurando Shell y Starship..."
 
-# Fuentes (Fonts)
+# Instalar Starship (Prompt)
+if ! command -v starship &> /dev/null; then
+    curl -sS https://starship.rs/install.sh | sh -s -- -y
+else
+    echo " -> Starship ya instalado"
+fi
+
+# Instalar Plugins de ZSH (Autosuggestions y Syntax Highlighting)
+# Los instalamos en ~/.zsh para que no requieran sudo y sea ordenado
+mkdir -p ~/.zsh
+if [ ! -d ~/.zsh/zsh-autosuggestions ]; then
+    git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh/zsh-autosuggestions
+fi
+if [ ! -d ~/.zsh/zsh-syntax-highlighting ]; then
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.zsh/zsh-syntax-highlighting
+fi
+# NOTA: Tu archivo .zshrc debe apuntar a estas rutas. Si usa /usr/share, avísame.
+
+# Cambiar shell por defecto a ZSH
+if [ "$SHELL" != "/usr/bin/zsh" ]; then
+    echo " -> Cambiando shell por defecto a ZSH..."
+    sudo chsh -s /usr/bin/zsh $USER
+fi
+
+# --- 5. COPIADO DE DOTFILES ---
+echo "[*] Instalando Dotfiles..."
+
+# Preparar directorios
+mkdir -p ~/.config
 mkdir -p ~/.local/share/fonts
+
+# Fuentes
 cp -r assets/fonts/* ~/.local/share/fonts/
 fc-cache -fv
 
-# Directorios de configuración básicos
-mkdir -p ~/.config
-
-# Copiamos carpetas enteras de config
-# Nota: Usamos 'cp -r' para copiar recursivamente
+# Configs Gráficas
 cp -r dotfiles/bspwm ~/.config/
 cp -r dotfiles/sxhkd ~/.config/
 cp -r dotfiles/polybar ~/.config/
-cp -r dotfiles/kitty ~/.config/
 cp -r dotfiles/rofi ~/.config/
 
-# CONFIGURACIÓN ESPECIAL DE PICOM
-# Vi que tienes código fuente dentro de dotfiles/picom, eso NO debe ir a .config
-# Solo copiamos el archivo de configuración
-mkdir -p ~/.config/picom
-cp dotfiles/picom/picom.conf ~/.config/picom/
-
-# Archivos sueltos (zshrc y starship)
+# Configs de Terminal
+cp -r dotfiles/kitty ~/.config/
 cp dotfiles/zshrc ~/.zshrc
 cp dotfiles/starship.toml ~/.config/starship.toml
 
-# Scripts y Binarios
+# Configs de Picom (Solo el .conf)
+mkdir -p ~/.config/picom
+cp dotfiles/picom/picom.conf ~/.config/picom/
+
+# Scripts y Wallpapers
 cp -r dotfiles/scripts ~/.config/
 cp -r dotfiles/bin ~/.config/
-
-# Wallpapers
 mkdir -p ~/.config/wallpapers
 cp -r assets/wallpapers/* ~/.config/wallpapers/
 
-# Permisos de ejecución
+# --- 6. AJUSTES FINALES Y PERMISOS ---
+echo "[*] Aplicando permisos y correcciones..."
+
 chmod +x ~/.config/bspwm/bspwmrc
 chmod +x ~/.config/polybar/launch.sh
 chmod +x ~/.config/scripts/*
 chmod +x ~/.config/bin/*
 
-# --- 5. LIMPIEZA ---
-echo "[*] Limpiando basura..."
+# FIX AUTOMÁTICO DE RENDIMIENTO (PICOM)
+# Esto cambia el backend a xrender si estaba en glx para evitar lentitud
+if grep -q 'backend = "glx"' ~/.config/picom/picom.conf; then
+    echo " -> Aplicando parche de rendimiento a Picom..."
+    sed -i 's/backend = "glx"/backend = "xrender"/g' ~/.config/picom/picom.conf
+    sed -i 's/vsync = true/vsync = false/g' ~/.config/picom/picom.conf
+fi
+
+# Limpieza
 rm -rf build
 
-echo "[+] ¡INSTALACIÓN COMPLETADA! Reinicia tu equipo."
+echo "[+] ¡INSTALACIÓN COMPLETADA!"
+echo "    Reinicia el sistema para ver los cambios en la terminal y entorno."
