@@ -68,11 +68,7 @@ echo "[*] Instalando Dotfiles..."
 
 # Preparar directorios
 mkdir -p ~/.config
-mkdir -p ~/.local/share/fonts
-
-# Fuentes
-cp -r assets/fonts/* ~/.local/share/fonts/
-fc-cache -fv
+mkdir -p ~/usr/share/fonts
 
 # Configs Gráficas
 cp -r dotfiles/bspwm ~/.config/
