@@ -117,4 +117,4 @@ super + alt + {Left,Down,Up,Right}
 
 #Customk resize
 super + alt + {Left,Down,Up,Right}
-  /home/venomcrane/.config/scripts/bspwm_resize {west,south,north,east}
+  /home/$USER/.config/scripts/bspwm_resize {west,south,north,east}

@@ -57,8 +57,7 @@ export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-# Created by `pipx` on 2024-08-18 16:01:25
-#export PATH="$PATH:/home/venomcrane/.local/bin"
+
 export PATH="$HOME/.local/bin:$PATH"
 
 
