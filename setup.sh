@@ -56,29 +56,24 @@ cd ../.. # Volver a la raíz
 # --- 4. ESTÉTICA DE TERMINAL (ZSH & STARSHIP) ---
 echo "[*] Configurando Shell y Starship..."
 
-# Instalar Starship (Prompt)
-if ! command -v starship &> /dev/null; then
-    curl -sS https://starship.rs/install.sh | sh -s -- -y
-else
-    echo " -> Starship ya instalado"
-fi
+curl -sS https://starship.rs/install.sh | sh -s -- -y
 
 # Instalar Plugins de ZSH (Autosuggestions y Syntax Highlighting)
 # Los instalamos en ~/.zsh para que no requieran sudo y sea ordenado
-mkdir -p ~/.zsh
-if [ ! -d ~/.zsh/zsh-autosuggestions ]; then
-    git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh/zsh-autosuggestions
-fi
-if [ ! -d ~/.zsh/zsh-syntax-highlighting ]; then
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.zsh/zsh-syntax-highlighting
-fi
+mkdir -p ~/.zsh_plugins
+git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.zsh/zsh-syntax-highlighting
+
+{
+  echo ""
+  echo "# Zsh Plugins (manual install, no oh-my-zsh)"
+  echo "source \$HOME/.zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
+  echo "source \$HOME/.zsh_plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+} >> ~/.zshrc
+
+sudo cp /assets/fonts/HackNerdFont* /usr/share/fonts/
 # NOTA: Tu archivo .zshrc debe apuntar a estas rutas. Si usa /usr/share, avísame.
 
-# Cambiar shell por defecto a ZSH
-if [ "$SHELL" != "/usr/bin/zsh" ]; then
-    echo " -> Cambiando shell por defecto a ZSH..."
-    sudo chsh -s /usr/bin/zsh $USER
-fi
 
 # --- 5. COPIADO DE DOTFILES ---
 echo "[*] Instalando Dotfiles..."
@@ -99,7 +94,7 @@ cp -r dotfiles/rofi ~/.config/
 
 # Configs de Terminal
 cp -r dotfiles/kitty ~/.config/
-cp dotfiles/zshrc ~/.zshrc
+/bin/cat dotfiles/zshrc >> ~/.zshrc
 cp dotfiles/starship.toml ~/.config/starship.toml
 
 # Configs de Picom (Solo el .conf)
@@ -122,11 +117,11 @@ chmod +x ~/.config/bin/*
 
 # FIX AUTOMÁTICO DE RENDIMIENTO (PICOM)
 # Esto cambia el backend a xrender si estaba en glx para evitar lentitud
-if grep -q 'backend = "glx"' ~/.config/picom/picom.conf; then
-    echo " -> Aplicando parche de rendimiento a Picom..."
-    sed -i 's/backend = "glx"/backend = "xrender"/g' ~/.config/picom/picom.conf
-    sed -i 's/vsync = true/vsync = false/g' ~/.config/picom/picom.conf
-fi
+#if grep -q 'backend = "glx"' ~/.config/picom/picom.conf; then
+#    echo " -> Aplicando parche de rendimiento a Picom..."
+#    sed -i 's/backend = "glx"/backend = "xrender"/g' ~/.config/picom/picom.conf
+#    sed -i 's/vsync = true/vsync = false/g' ~/.config/picom/picom.conf
+#fi
 
 # Limpieza
 rm -rf build
