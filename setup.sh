@@ -29,7 +29,7 @@ sudo apt install -y \
     meson ninja-build uthash-dev \
     polybar kali-community-wallpapers kali-wallpapers-all \
     kitty rofi feh xclip scrot flameshot \
-    zsh bat lsd neofetch  # Agregados para la terminal
+    zsh bat lsd   # Agregados para la terminal
 
 # --- 3. COMPILACIÓN DE ENTORNO GRÁFICO ---
 cd build
@@ -58,20 +58,8 @@ echo "[*] Configurando Shell y Starship..."
 
 curl -sS https://starship.rs/install.sh | sh -s -- -y
 
-# Instalar Plugins de ZSH (Autosuggestions y Syntax Highlighting)
-# Los instalamos en ~/.zsh para que no requieran sudo y sea ordenado
-mkdir -p ~/.zsh_plugins
-git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh/zsh-autosuggestions
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.zsh/zsh-syntax-highlighting
+sudo cp assets/fonts/HackNerdFont*  /usr/share/fonts
 
-{
-  echo ""
-  echo "# Zsh Plugins (manual install, no oh-my-zsh)"
-  echo "source \$HOME/.zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
-  echo "source \$HOME/.zsh_plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-} >> ~/.zshrc
-
-sudo cp /assets/fonts/HackNerdFont* /usr/share/fonts/
 # NOTA: Tu archivo .zshrc debe apuntar a estas rutas. Si usa /usr/share, avísame.
 
 
@@ -114,6 +102,7 @@ chmod +x ~/.config/bspwm/bspwmrc
 chmod +x ~/.config/polybar/launch.sh
 chmod +x ~/.config/scripts/*
 chmod +x ~/.config/bin/*
+sudo ln -s /usr/bin/batcat /usr/local/bin/bat
 
 # FIX AUTOMÁTICO DE RENDIMIENTO (PICOM)
 # Esto cambia el backend a xrender si estaba en glx para evitar lentitud
