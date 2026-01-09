@@ -25,6 +25,8 @@ libxcb-icccm4-dev libxcb-keysyms1-dev libxcb-xinerama0-dev \
 libxcb-xtest0-dev libxcb-shape0-dev libxcb-xkb-dev polybar \
 kali-community-wallpapers kali-wallpapers-all
 
+sudo apt install kitty rofi feh xclip scrot flameshot -y 
+
 
 # --- COMPILACIÓN (Usando la carpeta build) ---
 
@@ -101,10 +103,11 @@ for config in bspwm sxhkd polybar picom kitty rofi; do
 done
 
 # Permisos de ejecución para scripts internos de bspwm
-chmod +x ~/.config/bspwm/bspwmrc
-mkdir ~/.config/wallpapers
-cd 
-cp Ground-Zero/assets/wallpapers/* ~/.config/wallpapers
+cd
+cp -r /Ground-Zero/dotfiles/scripts ~/.config
+cp -r /Ground-Zero/dotfiles/bin ~/.config
+cp -r /Ground-Zero/assets/wallpapers ~/.config
+chmod +x ~/.config/bspwm/bspwmrc 
 
 
 # --- LIMPIEZA ---
