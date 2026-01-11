@@ -20,7 +20,7 @@ vmware-user-suid-wrapper &
 /usr/bin/feh --bg-fill /home/$USER/.config/wallpapers/HTB.png &
 ~/.config/polybar/launch.sh &
 picom &
-bspc config border_width 0
+bspc config border_width 2
 bspc config normal_border_color "#39FF14"
 bspc config active_border_color "#00FF9C"
 bspc config focused_border_color "#AEFF00"

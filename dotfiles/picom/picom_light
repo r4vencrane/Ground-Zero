@@ -28,13 +28,14 @@ round-borders = 0;
 ########################################
 # OPACITY
 ########################################
-inactive-opacity = 0.90;
-active-opacity = 0.95;
-frame-opacity = 0.90;
+inactive-opacity = 1.0
+frame-opacity = 1.0
+opacity = 1.0
 inactive-opacity-override = false;
+active-opacity = 1.0
 
 # Reglas de transparencia para terminales
-opacity-rule = [ "90:class_g = 'kitty'", "90:class_g = 'Alacritty'" ];
+#opacity-rule = [ "90:class_g = 'kitty'", "90:class_g = 'Alacritty'" ];
 
 ########################################
 # FADING
