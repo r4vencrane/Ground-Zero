@@ -102,6 +102,29 @@ function execute_process() {
     fi
 }
 
+function request_sudo(){
+    echo -e "${greenColour}[*]${purpleColour} Requesting sudo permissions...${endColour}"
+    
+    # Intentamos refrescar las credenciales de sudo.
+    # Si el usuario ya tiene permisos recientes, no pedirá nada.
+    # Si no, pedirá la contraseña aquí mismo, de forma interactiva y limpia.
+    if sudo -v; then
+        # Si la contraseña es correcta, entramos aquí.
+        
+        # Mantenemos el token de sudo vivo en segundo plano
+        # Esto se ejecuta infinitamente mientras el script principal ($$) siga vivo.
+        while true; do 
+            sudo -n true 
+            sleep 60 
+            kill -0 "$$" || exit 
+        done 2>/dev/null &
+        
+        echo -e "${greenColour}[✔]${endColour} ${turquoiseColour}Sudo Configurated.${endColour}\n"
+    else
+        echo -e "${redColour}[✖] Authentication Failed. This program needs sudo permissions to perform system installation.${endColour}"
+        exit 1
+    fi
+}
 
 
 function install_dependencies(){
@@ -208,6 +231,7 @@ function install_fonts_themes(){
 
 function full_installation(){ 
   echo -e "\n${turquoiseColour}$(for i in $(seq 1 32); do echo -n '='; done)[::] Full Installation [::]$(for i in $(seq 1 31); do echo -n "="; done)${endColour}\n"
+  request_sudo 
   execute_process "install_dependencies" "System Dependencies"
   execute_process "compile_environment" "Compiling Environment"
   execute_process "install_dotfiles" "Files Configurations"
