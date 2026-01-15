@@ -127,8 +127,7 @@ function request_sudo(){
 }
 
 
-function install_dependencies(){
-  sudo apt update && sudo 
+function install_dependencies(){ 
 
   DEPENDENCIES=(
         build-essential git vim xcb libxcb-util0-dev libxcb-ewmh-dev 
