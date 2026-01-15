@@ -92,6 +92,12 @@ function compile_environment(){
   sudo make -C bspwm install
   sudo cp bspwm/contrib/freedesktop/bspwm.desktop /usr/share/xsessions/
 
+  if [ ! -d "sxhkd" ]; then
+        git clone https://github.com/baskerville/sxhkd.git
+    fi
+    make -C sxhkd
+    sudo make -C sxhkd install
+
   if [ ! -d "picom" ]; then
         git clone https://github.com/yshui/picom.git  
   fi
