@@ -239,92 +239,85 @@ function full_installation(){
 }
 
 function pwnbox_mode(){
-  echo -e "\n${turquoiseColour}$(for i in $(seq 1 32); do echo -n '='; done)[::] Installing Phantom Terminal [::]$(for i in $(seq 1 31); do echo -n "="; done)${endColour}\n"
-  spinner "${grayColour}Installing zsh ${endColour}" &
-  SPINNER_PID=$!
-  sudo apt install zsh -y &>/dev/null 
-  sed -i '/oh-my-zsh.sh/s/^/#/' ~/.zshrc
+    echo -e "\n${turquoiseColour}$(for i in $(seq 1 32); do echo -n '='; done)[::] Installing Phantom Terminal [::]$(for i in $(seq 1 31); do echo -n "="; done)${endColour}\n"
+    
+    # 1. Aseguramos permisos antes de empezar para evitar bloqueos
+    request_sudo
 
-  # ========== [✔] Instalar plugins: autosuggestions & syntax highlighting ==========
-  mkdir -p ~/.zsh_plugins
-  git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh_plugins/zsh-autosuggestions &>/dev/null
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.zsh_plugins/zsh-syntax-highlighting &>/dev/null
+    # --- ZSH & Plugins ---
+    # Agrupamos la instalación y la descarga de plugins
+    CMD_ZSH="sudo apt install zsh -y && \
+    mkdir -p ~/.zsh_plugins && \
+    git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh_plugins/zsh-autosuggestions && \
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.zsh_plugins/zsh-syntax-highlighting"
+    
+    execute_process "$CMD_ZSH" "Installing Zsh & Plugins"
 
-  # ========== [✔] Activar plugins manualmente ==========
-  {
-    echo ""
-    echo "# Zsh Plugins (manual install, no oh-my-zsh)"
-    echo "source \$HOME/.zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
-    echo "source \$HOME/.zsh_plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-  } >> ~/.zshrc
-  kill "$SPINNER_PID" &>/dev/null
-  echo -ne "\r${limaColour}[✔]${endColour} ${blueColour}Zsh${endColour} ${grayColour}Installed.${endColour}\n"
+    # Configuración de .zshrc (Sed y Echos)
+    CMD_ZSH_CONF="sed -i '/oh-my-zsh.sh/s/^/#/' ~/.zshrc; \
+    echo '' >> ~/.zshrc; \
+    echo '# Zsh Plugins' >> ~/.zshrc; \
+    echo 'source \$HOME/.zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh' >> ~/.zshrc; \
+    echo 'source \$HOME/.zsh_plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' >> ~/.zshrc"
+    
+    execute_process "$CMD_ZSH_CONF" "Configuring .zshrc plugins"
 
-  spinner "${grayColour}Installing kitty ${endColour}" &
-  SPINNER_PID=$!
-  sudo apt install kitty -y &>/dev/null
-  sudo apt install boxes -y &>/dev/null 
-  mkdir ~/.config/kitty  &>/dev/null
-  cp kitty/kitty.conf ~/.config/kitty/ &>/dev/null
-  sudo cp fonts/HackNerdFont* /usr/share/fonts/
-  kill "$SPINNER_PID" &>/dev/null
-  echo -ne "\r${limaColour}[✔]${endColour} ${blueColour}Kitty${endColour} ${grayColour}Installed & Configurated.${endColour}              \n"
+    # --- Kitty Terminal ---
+    # Asumiendo que tu config está en 'dotfiles/kitty' y fuentes en 'assets/fonts'
+    CMD_KITTY="sudo apt install kitty boxes -y && \
+    mkdir -p ~/.config/kitty && \
+    cp dotfiles/kitty/kitty.conf ~/.config/kitty/ && \
+    sudo cp assets/fonts/HackNerdFont* /usr/local/share/fonts/ && \
+    fc-cache -fv"
+    
+    execute_process "$CMD_KITTY" "Installing Kitty & NerdFonts"
 
-  spinner "${grayColour}Installing Starship Powerline ${endColour}" &
-  SPINNER_PID=$!
-  curl -sS https://starship.rs/install.sh | sh -s -- -y > /dev/null 2>&1 #aqui le tenemos que dar que si 
-  echo 'eval "$(starship init zsh)"' >> ~/.zshrc 
-  cp starship.toml ~/.config/
-  kill "$SPINNER_PID" &>/dev/null
-  echo -ne "\r${limaColour}[✔]${endColour} ${blueColour}Starship${endColour} ${grayColour}Installed & Configurated.${endColour}\n"
+    # --- Starship ---
+    CMD_STARSHIP="curl -sS https://starship.rs/install.sh | sh -s -- -y && \
+    echo 'eval \"\$(starship init zsh)\"' >> ~/.zshrc && \
+    cp dotfiles/starship.toml ~/.config/"
+    
+    execute_process "$CMD_STARSHIP" "Installing Starship Powerline"
 
-  spinner "${grayColour}Installing Lsd & bat (ls & cat with steroids) ${endColour}" &
-  SPINNER_PID=$!
-  sudo apt install lsd -y &>/dev/null
-  sudo apt install bat -y &>/dev/null
-  echo "# Manual aliases
-  alias ll='lsd -lh --group-dirs=first'
-  alias la='lsd -a --group-dirs=first'
-  alias l='lsd --group-dirs=first'
-  alias lla='lsd -lha --group-dirs=first'
-  alias ls='lsd --group-dirs=first'
-  alias cat='batcat'" >> ~/.zshrc 
-  kill "$SPINNER_PID" &>/dev/null
-  echo -ne "\r${limaColour}[✔]${endColour} ${blueColour}Lsd & Bat${endColour} ${grayColour}Installed.${endColour}\n"
-  #Target
-  spinner "${grayColour}Setting up ${endColour}${limaColour}target.sh${endColour}" &
-  SPINNER_PID=$!
-  sudo cp target.sh /usr/local/bin/target  
-  sudo chmod +x /usr/local/bin/target  
-  kill "$SPINNER_PID" &>/dev/null
-  echo -ne "\r${limaColour}[✔]${endColour} ${limaColour}target.sh${endColour} ${grayColour}is ready to use.${endColour}\n"
+    # --- LSD & BAT ---
+    execute_process "sudo apt install lsd bat -y" "Installing Lsd & Bat"
 
-  echo -e "\n${limaColour}[+]${endColour} ${turquoiseColour}Hacking Arsenal${endColour}"
-  #Arsenal
-  spinner "${grayColour}Setting up ${endColour}${limaColour}Network Recon${endColour}" &
-  SPINNER_PID=$!
-  git clone https://github.com/r4vencrane/Network-Recon.git &>/dev/null
-  mv Network-Recon ../ &>/dev/null
-  sudo cp ../Network-Recon/netrecon.sh /usr/local/bin/netrecon
-  sudo chmod +x /usr/local/bin/netrecon
-  kill "$SPINNER_PID" &>/dev/null
-  echo -ne "\r${limaColour}[✔]${endColour} ${limaColour}Network Recon${endColour} ${grayColour}is ready to use.${endColour}\n"
+    # Aliases
+    CMD_ALIASES="echo '' >> ~/.zshrc && \
+    echo '# Manual aliases' >> ~/.zshrc && \
+    echo \"alias ll='lsd -lh --group-dirs=first'\" >> ~/.zshrc && \
+    echo \"alias la='lsd -a --group-dirs=first'\" >> ~/.zshrc && \
+    echo \"alias l='lsd --group-dirs=first'\" >> ~/.zshrc && \
+    echo \"alias lla='lsd -lha --group-dirs=first'\" >> ~/.zshrc && \
+    echo \"alias ls='lsd --group-dirs=first'\" >> ~/.zshrc && \
+    echo \"alias cat='batcat'\" >> ~/.zshrc"
+    
+    execute_process "$CMD_ALIASES" "Configuring Shell Aliases"
 
-  #Arsenal
-  spinner "${grayColour}Setting up ${endColour}${limaColour}Root Shadow${endColour}" &
-  SPINNER_PID=$!
-  git clone https://github.com/r4vencrane/Root-Shadow.git &>/dev/null
-  mv Root-Shadow ../ &>/dev/null
-  kill "$SPINNER_PID" &>/dev/null
-  echo -ne "\r${limaColour}[✔]${endColour} ${limaColour}Root Shadow${endColour} ${grayColour}is ready to use.${endColour}\n"
-  sleep 1
-  
-  gsettings set org.mate.background picture-filename /usr/share/backgrounds/hackthebox-alt.jpg &>/dev/null
-  echo -ne "\n${limaColour}[✔]${endColour} ${grayColour}Finished. Enjoy!${endColour}\n"
-  echo -e "${limaColour}[+]${endColour} ${grayColour}Now you can open ${blueColour}kitty${endColour} ${grayColour}terminal${endColour}\n"
-  source ~/.zshrc &>/dev/null
+    # --- Hacking Arsenal ---
+    echo -e "\n${limaColour}[+]${endColour} ${turquoiseColour}Hacking Arsenal${endColour}"
 
+    # Target
+    # Asumo que target.sh está en 'dotfiles/bin/' o en la raíz, ajusta la ruta origen si es necesario
+    execute_process "sudo cp dotfiles/bin/target /usr/local/bin/target && sudo chmod +x /usr/local/bin/target" "Setting up target.sh"
+
+    # Network Recon & Root Shadow
+    # Creamos carpeta temporal o Tools para clonar, instalar y limpiar
+    CMD_TOOLS="mkdir -p ~/Tools && \
+    git clone https://github.com/r4vencrane/Network-Recon.git ~/Tools/Network-Recon && \
+    sudo cp ~/Tools/Network-Recon/netrecon.sh /usr/local/bin/netrecon && \
+    sudo chmod +x /usr/local/bin/netrecon && \
+    git clone https://github.com/r4vencrane/Root-Shadow.git ~/Tools/Root-Shadow"
+    
+    execute_process "$CMD_TOOLS" "Installing Recon Tools"
+
+    # --- Finalización ---
+    execute_process "gsettings set org.mate.background picture-filename /usr/share/backgrounds/hackthebox-alt.jpg" "Setting Wallpaper"
+
+    echo -e "\n${limaColour}[✔]${endColour} ${grayColour}Finished. Enjoy!${endColour}"
+    echo -e "${limaColour}[+]${endColour} ${grayColour}Now you can open ${blueColour}kitty${endColour} ${grayColour}terminal${endColour}\n"
 }
+
 
 
 function options(){
