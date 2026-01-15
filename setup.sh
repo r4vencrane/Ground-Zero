@@ -32,29 +32,18 @@ function ctrl_c(){
 
 trap ctrl_c INT
 
-banner="${limaColour}$(cat << "EOF"
+banner="${turquoiseColour}$(cat << "EOF"
 
-     _________
-    / ======= \
-   / __________\
-  | ___________ | ---------------------------------------------------------------------------------------------------------
-  | |         | |       ________                               .___ __________                   
-  | |         | |      /  _____/______  ____  __ __  ____    __| _/ \____    /___________  ____  
-  | |         | |     /   \  __\_  __ \/  _ \|  |  \/    \  / __ |    /     // __ \_  __ \/  _ \ 
-                      \    \_\  \  | \(  <_> )  |  /   |  \/ /_/ |   /     /\  ___/|  | \(  <_> )
-                       \______  /__|   \____/|____/|___|  /\____ |  /_______ \___  >__|   \____/ 
-                              \/                        \/      \/          \/   \/
-  | | -       | |
-  | |         | |
-  | |_________| |________________________
-  \=____________/       
-  / """"""""""" \                       
- / ::::::::::::: \                  
-(_________________)
-
-                                         -=[ by r4venn ]=-                                        
+          __________________ ________   ____ __________  ________       _______________________________ ________   
+         /  _____/\______   \\_____  \ |    |   \      \ \______ \      \____    /\_   _____/\______   \\_____  \  
+        /   \  ___ |       _/ /   |   \|    |   /   |   \ |    |  \       /     /  |    __)_  |       _/ /   |   \ 
+        \    \_\  \|    |   \/    |    \    |  /    |    \|    `   \     /     /_  |        \ |    |   \/    |    \
+         \______  /|____|_  /\_______  /______/\____|__  /_______  /    /_______ \/_______  / |____|_  /\_______  / v1.0
+                \/        \/         \/                \/        \/             \/        \/         \/         \/
 
 
+  // AUTHOR : r4vencrane
+  // GITHUB : github.com/r4vencrane
 
 EOF
 )${endColour}"
@@ -68,6 +57,111 @@ function spinner(){
     ((i=(i+1)%4))
     sleep 0.1
   done
+}
+
+function install_dependencies(){
+  sudo apt update && sudo 
+
+  DEPENDENCIES=(
+        build-essential git vim xcb libxcb-util0-dev libxcb-ewmh-dev 
+        libxcb-randr0-dev libxcb-icccm4-dev libxcb-keysyms1-dev libxcb-xinerama0-dev 
+        libasound2-dev libxcb-xtest0-dev libxcb-shape0-dev libxcb-xkb-dev
+        libconfig-dev libdbus-1-dev libegl-dev libev-dev libgl-dev libepoxy-dev 
+        libpcre2-dev libpixman-1-dev libx11-xcb-dev libxcb1-dev libxcb-composite0-dev 
+        libxcb-damage0-dev libxcb-glx0-dev libxcb-image0-dev libxcb-present-dev 
+        libxcb-render0-dev libxcb-render-util0-dev libxcb-util-dev libxcb-xfixes0-dev 
+        meson ninja-build uthash-dev
+        polybar rofi feh kitty lsd bat boxes zsh curl wget
+    )
+
+    sudo apt update
+    sudo apt install "${DEPENDENCIES[@]}"
+
+    sudo ln -s /usr/bin/batcat /usr/local/bin/bat
+}
+
+function compile_environment(){
+  mkdir -p build 
+  cd build || exit 
+
+  if [ ! -d "bspwm" ]; then
+        git clone https://github.com/baskerville/bspwm.git
+  fi
+    
+  make -C bspwm
+  sudo make -C bspwm install
+  sudo cp bspwm/contrib/freedesktop/bspwm.desktop /usr/share/xsessions/
+
+  if [ ! -d "picom" ]; then
+        git clone https://github.com/yshui/picom.git  
+  fi
+  cd picom
+  meson setup --buildtype=release build
+  ninja -C build
+  sudo ninja -C build install
+  cd .. # Salir de picom
+
+  cd .. # Salir de carpeta build
+  rm -rf build # Limpieza
+}
+
+function install_dotfiles(){
+  mkdir -p ~/.config/bspwm
+  mkdir -p ~/.config/sxhkd
+  mkdir -p ~/.config/scripts
+  mkdir -p ~/.config/bin
+  mkdir -p ~/.config/picom
+  mkdir -p ~/.config/polybar
+  mkdir -p ~/.config/rofi
+  mkdir -p ~/.config/kitty
+  mkdir -p ~/.config/wallpapers
+
+  # Copiar configs (Asume que estás en la raíz del repo clonado)
+  cp dotfiles/bspwm/* ~/.config/bspwm/
+  cp dotfiles/sxhkd/* ~/.config/sxhkd/
+  cp dotfiles/scripts/* ~/.config/scripts/
+  cp dotfiles/bin/* ~/.config/bin/ # Asegúrate que 'target' es el nombre correcto del binario/script
+  
+  # Picom Config
+  /bin/cat dotfiles/picom/picom_home > ~/.config/picom/picom.conf
+
+  # Polybar Config
+  cp -r dotfiles/polybar/* ~/.config/polybar/
+
+  # Rofi Config
+  cp -r dotfiles/rofi/* ~/.config/rofi/
+
+  # Kitty Config
+  cp dotfiles/kitty/* ~/.config/kitty/
+
+  # Wallpapers
+  cp assets/wallpapers/* ~/.config/wallpapers/
+
+  # Permisos de ejecución necesarios
+  chmod +x ~/.config/bspwm/bspwmrc
+  chmod +x ~/.config/scripts/*
+}
+
+function install_fonts_themes(){
+  sudo cp assets/fonts/HackNerdFont* /usr/local/share/fonts/ 2>/dev/null 
+  sudo cp dotfiles/polybar/fonts/* /usr/share/fonts/truetype/ 2>/dev/null
+  
+  # Actualizar caché de fuentes
+  fc-cache -v > /dev/null 2>&1
+
+  curl -sS https://starship.rs/install.sh | sh -s -- -y
+  cp dotfiles/starship.toml ~/.config/
+  /bin/cat dotfiles/zshrc >> ~/.zshrc
+}
+
+
+function full_installation(){ 
+  echo -e "\n${turquoiseColour}$(for i in $(seq 1 32); do echo -n '='; done)[::] Full Installation [::]$(for i in $(seq 1 31); do echo -n "="; done)${endColour}\n"
+  install_dependencies
+  compile_environment
+  install_dotfiles
+  install_fonts_themes
+
 }
 
 function pwnbox_mode(){
@@ -159,25 +253,83 @@ function pwnbox_mode(){
 }
 
 
-function main(){
-  echo -e "$banner"
-  echo -e "\n${turquoiseColour}$(for in in $(seq 1 100); do echo -n '='; done)"
-  echo -e "                                       I N S T A L L A T I O N"
-  echo -e "$(for in in $(seq 1 100); do echo -n '='; done)${endColour}"
-  echo -e "\n${limaColour}[+]${endColour}${grayColour} This program requires ${blueColour}sudo${endColour}${grayColour} permissions for a successful installation"
-  
-  echo -ne "\n${purpleColour}[~]${endColour}${grayColour} Install Phantom Terminal?${endColour} ${limaColour}[y/n]:${endColour} "
-  read output_show
+function options(){
+  echo -e "${lightCyanColour}▌ 1 ▐${endColour} ${limaColour}Full Setup"
+  echo -e "${lightCyanColour}▌ 2 ▐${endColour} ${limaColour}Phantom Terminal"
+  echo -e "${lightCyanColour}▌ 3 ▐${endColour} ${limaColour}Pwnbox Mode"
+  echo -e "${lightCyanColour}▌ 4 ▐${endColour} ${limaColour}Nvim & NvChad"
 
-  if [[ $output_show == "y" ]]; then
-    echo '"y" was selected'
-  elif [[ $output_show == "n" ]]; then
-    echo -e "${redColour}[-] Hmmmmm alright${endColour}"
-    exit 0
-  else
-    echo -e "${redColour}[!] You have to select y/n${endColour}"
-    exit 1
-  fi
 }
 
-main 
+function select_options(){
+  echo -e "$banner"
+  echo -e "\n${limaColour}$(for in in $(seq 1 120); do echo -n '='; done)"
+  echo -e "                                                I N S T A L L A T I O N"
+  echo -e "$(for in in $(seq 1 120); do echo -n '='; done)${endColour}"
+  echo -e "\n${limaColour}[+]${endColour}${blueColour} This program requires ${limaColour}sudo${endColour}${blueColour} permissions for a successful installation"
+
+  echo -e "\n${limaColour}[+]${endColour} ${grayColour}Select an option:${endColour}\n"
+  options 
+  echo -ne "\n${purpleColour}[~]${endColour} ${grayColour}Install: ${endColour}"
+  read output_show
+
+  if [[ $output_show -eq 1 ]]; then
+    full_installation
+  elif [[ $output_show -eq 2 ]]; then 
+    terminal_strike
+  elif [[ $output_show -eq 3 ]]; then 
+     pwnbox_mode
+  elif [[ $output_show -eq 4 ]]; then 
+    nvim_installation
+  else 
+    echo -e "\n${redColour}[!] You have to select a number! [1-4]${endColour}"
+  fi
+  
+}
+
+function helpPanel(){
+  echo -e "$banner" 
+  echo -e "\n${limaColour}$(for in in $(seq 1 120); do echo -n '='; done)"
+  echo -e "                                                  H E L P   P A N E L"
+  echo -e "$(for in in $(seq 1 120); do echo -n '='; done)${endColour}"
+  echo -e "\n${limaColour}[+]${endColour} ${grayColour}Usage:${endColour} \n\t${turquoiseColour}./groundzero.sh [options]${endColour}"
+  echo -e "\n${limaColour}[+]${endColour} ${grayColour}Options:${endColour}"
+  echo -e "  ${turquoiseColour}-o${endColour}          ➜ ${grayColour}Show Installation Options ${purpleColour}(Interactive Menu)${endColour}"
+  echo -e "  ${turquoiseColour}-f${endColour}          ➜ ${grayColour}Full Setup. Includes: ${greenColour}Bspwm, Polybar, Picom, Rofi, Zsh ${endColour}"
+  echo -e "  ${turquoiseColour}-t${endColour}          ➜ ${grayColour}Phantom Terminal. Only CLI tools: ${greenColour}Zsh, Starship Powerline, Bat, Lsd, Kitty. ${endColour}"
+  echo -e "  ${turquoiseColour}-p${endColour}          ➜ ${grayColour}Pwnbox Mode. ${greenColour}Install Terminal Strike in Pwnbox${endColour}"
+  echo -e "  ${turquoiseColour}-n${endColour}          ➜ ${grayColour}Install Nvim with Nvchad${endColour}"
+  
+  echo -e "\n${limaColour}[+]${endColour} ${grayColour}Examples:${endColour}"
+  echo -e "\t${greenColour}./groundzero.sh -f${endColour} (Recommended for fresh installs)"
+  echo -e "\t${greenColour}./groundzero.sh -t${endColour} (Only shell configuration)"
+
+}
+
+
+declare -i parameter_counter=0 
+
+while getopts "oftpnh" arg; do
+  case $arg in
+    o) let parameter_counter+=1;;
+    f) let parameter_counter+=2;;
+    t) let parameter_counter+=3;;
+    p) let parameter_counter+=4;;
+    n) let parameter_counter+=5;;
+    h) ;;
+  esac
+done
+
+if [[ $parameter_counter -eq 1 ]]; then
+  select_options
+elif [[ $parameter_counter -eq 2 ]]; then 
+  full_installation
+elif [[ $parameter_counter -eq 3 ]]; then 
+  terminal_strike
+elif [[ $parameter_counter -eq 4 ]]; then 
+  pwnbox_mode
+elif [[ $parameter_counter -eq 5 ]]; then 
+  nvim_installation 
+else 
+  helpPanel
+fi 
