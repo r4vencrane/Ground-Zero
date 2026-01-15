@@ -26,7 +26,10 @@ endColour='\033[0m'
 
 #Ctrl+C 
 function ctrl_c(){
-  echo -e "\n\n${redColour}[+] Leaving...${endColour}\n"
+  echo -e "\n\n${redColour}[!] Leaving...${endColour}\n"
+  tput cnorm # Recuperar cursor
+  # Matamos procesos hijos forzosamente
+  pkill -P $$ 2>/dev/null
   exit 1
 }
 
@@ -48,16 +51,58 @@ banner="${turquoiseColour}$(cat << "EOF"
 EOF
 )${endColour}"
 
+LOG_FILE="setup.log"
+
 # Función de Spinner
+
 function spinner(){
-  local SPIN=("◐" "◓" "◑" "◒")
-  local i=0
-  while true; do 
-    echo -ne "\r${limaColour}[${SPIN[i]}]${endColour} $1"
-    ((i=(i+1)%4))
-    sleep 0.1
-  done
+    local pid_proc=$1
+    local msg="$2"
+    local SPIN=("◐" "◓" "◑" "◒")
+    local i=0
+
+    tput civis # Ocultar cursor
+
+    # Mientras el proceso con PID $pid_proc exista...
+    while kill -0 "$pid_proc" 2>/dev/null; do
+        echo -ne "\r${limaColour}[${SPIN[i]}]${endColour} ${grayColour}${msg}...${endColour}"
+        ((i=(i+1)%4))
+        sleep 0.1
+    done
+
+    tput cnorm # Recuperar cursor al terminar
 }
+
+function execute_process() {
+    local command="$1"
+    local message="$2"
+
+    # 1. Ejecutamos el comando en SEGUNDO PLANO (&)
+    # Redirigimos stderr a stdout y todo al log
+    eval "$command" >> "$LOG_FILE" 2>&1 &
+    
+    # 2. Capturamos el PID del comando que acabamos de lanzar
+    local pid_proc=$!
+
+    # 3. Llamamos al spinner (Bloquea la ejecución hasta que pid_proc termine)
+    spinner "$pid_proc" "$message"
+
+    # 4. Esperamos el código de salida del proceso ya terminado
+    wait "$pid_proc"
+    local exit_code=$?
+
+    # 5. Limpiamos la línea del spinner
+    echo -ne "\r\033[K"
+
+    # 6. Mostramos resultado final alineado
+    if [ $exit_code -eq 0 ]; then
+        printf "${greenColour}[✔]${endColour}${grayColour} %-50s${endColour} ${limaColour}[OK]${endColour}\n" "$message"
+    else
+        printf "${redColour}[✖]${endColour}${grayColour} %-50s${endColour} ${redColour}[ERROR]${endColour}\n" "$message"
+    fi
+}
+
+
 
 function install_dependencies(){
   sudo apt update && sudo 
@@ -75,7 +120,7 @@ function install_dependencies(){
     )
 
     sudo apt update
-    sudo apt install "${DEPENDENCIES[@]}"
+    sudo apt install "${DEPENDENCIES[@]}" -y 
 
     sudo ln -s /usr/bin/batcat /usr/local/bin/bat
 }
@@ -163,10 +208,10 @@ function install_fonts_themes(){
 
 function full_installation(){ 
   echo -e "\n${turquoiseColour}$(for i in $(seq 1 32); do echo -n '='; done)[::] Full Installation [::]$(for i in $(seq 1 31); do echo -n "="; done)${endColour}\n"
-  install_dependencies
-  compile_environment
-  install_dotfiles
-  install_fonts_themes
+  execute_process "install_dependencies" "System Dependencies"
+  execute_process "compile_environment" "Compiling Environment"
+  execute_process "install_dotfiles" "Files Configurations"
+  execute_process "install_fonts_themes" "Aesthetic and Shell"
 
 }
 
