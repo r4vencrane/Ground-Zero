@@ -263,7 +263,7 @@ function install_fonts_themes(){
 
 function full_installation(){ 
     # Header estético
-    echo -e "\n${turquoiseColour}$(for i in $(seq 1 32); do echo -n '='; done)[::] /// FULL INSTALLATION [::]$(for i in $(seq 1 31); do echo -n "="; done)${endColour}\n"
+    echo -e "\n${turquoiseColour}$(for i in $(seq 1 45); do echo -n '='; done)[::] /// FULL INSTALLATION [::]$(for i in $(seq 1 44); do echo -n "="; done)${endColour}\n"
     
     # Verificamos internet antes de empezar nada
     echo -e "${grayColour}[*] Checking connectivity...${endColour}"
@@ -281,8 +281,8 @@ function full_installation(){
     execute_process "install_dotfiles" "Deploying Configuration Files"
     execute_process "install_fonts_themes" "Setting up Shell & Aesthetics"
 
-    echo -e "\n${turquoiseColour} /// Installation Complete.${endColour}\n"
-    echo -e "${purpleColour}[+]${limaColour} Please reboot your system to enter the GroundZero environment.${endColour}\n" | boxes -d stone 
+    echo -e "\n${turquoiseColour}$(for i in $(seq 1 45); do echo -n '='; done)[::] /// INSTALLATION COMPLETED [::]$(for i in $(seq 1 44); do echo -n "="; done)${endColour}\n"
+    echo -e "${purpleColour}[+]${limaColour} Please reboot your system to enter the GroundZero environment.${endColour}" | boxes -d stone 
 }
 
 
@@ -361,6 +361,8 @@ function pwnbox_mode(){
 
     # --- Finalización ---
     execute_process "gsettings set org.mate.background picture-filename /usr/share/backgrounds/hackthebox-alt.jpg" "Setting Wallpaper"
+    sudo cp dotfiles/target.sh /usr/local/bin/target  
+    sudo chmod +x /usr/local/bin/target
 
     echo -e "\n${limaColour}[✔]${endColour} ${grayColour}Finished. Enjoy!${endColour}"
     echo -e "${limaColour}[+]${endColour} ${grayColour}Now you can open ${blueColour}kitty${endColour} ${grayColour}terminal${endColour}\n"
