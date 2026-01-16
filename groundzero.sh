@@ -281,8 +281,8 @@ function full_installation(){
     execute_process "install_dotfiles" "Deploying Configuration Files"
     execute_process "install_fonts_themes" "Setting up Shell & Aesthetics"
 
-    echo -e "\n${turquoiseColour}$(for i in $(seq 1 45); do echo -n '='; done)[::] /// INSTALLATION COMPLETED [::]$(for i in $(seq 1 44); do echo -n "="; done)${endColour}\n"
-    echo -e "${purpleColour}[+]${limaColour} Please reboot your system to enter the GroundZero environment.${endColour}" | boxes -d stone 
+    echo -e "\n${turquoiseColour}$(for i in $(seq 1 43); do echo -n '='; done)[::] /// INSTALLATION COMPLETED [::]$(for i in $(seq 1 42); do echo -n "="; done)${endColour}\n"
+    echo -e "${purpleColour}[+]${limaColour} Please reboot your system to enter to your new environment.${endColour}" | boxes -d stone 
 }
 
 
@@ -368,67 +368,127 @@ function pwnbox_mode(){
     echo -e "${limaColour}[+]${endColour} ${grayColour}Now you can open ${blueColour}kitty${endColour} ${grayColour}terminal${endColour}\n"
 }
 
-function picom_modes_test(){
-  echo -e "\n${turquoiseColour}// COMPOSITOR SETUP (Picom) :${endColour}\n"
+function phantom_terminal(){
+    echo -e "\n${turquoiseColour}$(printf '=%.0s' {1..35}) [::] PHANTOM TERMINAL [::] $(printf '=%.0s' {1..35})${endColour}\n"
+    
+    # 1. Aseguramos permisos (y validamos internet rápido)
+    wget -q --spider http://google.com
+    if [ $? -ne 0 ]; then
+        echo -e "\n${redColour}[!] No internet connection. Aborting.${endColour}\n"
+        return 1
+    fi
+    request_sudo
 
-  echo -e "\n  ${purpleColour}❱ 1 ❰${endColour} ${turquoiseColour}AESTHETIC MODE${endColour}"
- 
-  # Opción 2: Performance
-  echo -e "\n  ${purpleColour}❱ 2 ❰${endColour} ${turquoiseColour}PERFORMANCE MODE${endColour}"
-  
-  # Prompt estilo terminal
-  echo -ne "\n${limaColour}┌──(select${endColour}${grayColour}::${endColour}${purpleColour}picom${endColour}${limaColour})${endColour}"
-  echo -ne "\n${limaColour}└─${endColour}${grayColour}>>${endColour} "
-  read output_blur
+    # --- FUNCIÓN 1: ZSH & PLUGINS ---
+    function install_zsh_core(){
+        # Instalamos Zsh sin output basura
+        sudo apt install zsh git -y -q > /dev/null 2>&1
+        
+        # Creamos carpeta de plugins
+        mkdir -p ~/.zsh_plugins
 
-  #mkdir -p ~/.config/picom 
+        # Plugin: Autosuggestions (Si existe, borramos y clonamos de nuevo para asegurar limpieza)
+        if [ -d "$HOME/.zsh_plugins/zsh-autosuggestions" ]; then
+            rm -rf "$HOME/.zsh_plugins/zsh-autosuggestions"
+        fi
+        git clone -q https://github.com/zsh-users/zsh-autosuggestions ~/.zsh_plugins/zsh-autosuggestions
 
-  if [[ $output_blur -eq 1 ]]; then
-    #/bin/cat dotfiles/picom/picom_quality > ~/.config/picom/picom.conf
-    echo -e "\n${limaColour}[ Quality Mode Selected ]"
-  elif [[ $output_blur -eq 2 ]]; then 
-    #/bin/cat dotfiles/picom/picom_performance > ~/.config/picom/picom.conf
-    echo -e "\n${limaColour}[ Performance Mode Selected ]"
-  else 
-    echo -e "\n${redColour}[!] You have to select a number! [1-2]${endColour}"
-  fi
+        # Plugin: Syntax Highlighting
+        if [ -d "$HOME/.zsh_plugins/zsh-syntax-highlighting" ]; then
+            rm -rf "$HOME/.zsh_plugins/zsh-syntax-highlighting"
+        fi
+        git clone -q https://github.com/zsh-users/zsh-syntax-highlighting ~/.zsh_plugins/zsh-syntax-highlighting
 
-  sleep 10
+        # Configuramos .zshrc (Solo si no está ya configurado)
+        if ! grep -q "zsh-autosuggestions" ~/.zshrc; then
+            echo -e "\n# --- Zsh Plugins (Phantom) ---" >> ~/.zshrc
+            echo "source $HOME/.zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" >> ~/.zshrc
+            echo "source $HOME/.zsh_plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ~/.zshrc
+        fi
+    }
 
+    # --- FUNCIÓN 2: KITTY & NERDFONTS ---
+    function setup_kitty_visuals(){
+        sudo apt install kitty boxes -y -q > /dev/null 2>&1
+        
+        # Configuración de Kitty
+        mkdir -p ~/.config/kitty
+        # Usamos cp -f para forzar sobreescritura si actualizas tus dotfiles
+        cp -f dotfiles/kitty/kitty.conf ~/.config/kitty/ 2>/dev/null
+
+        # Fuentes (Solo si existen en tu carpeta assets)
+        if [ -d "assets/fonts" ]; then
+            sudo cp -n assets/fonts/HackNerdFont* /usr/local/share/fonts/ 2>/dev/null
+            fc-cache -fv > /dev/null 2>&1
+        fi
+    }
+
+    # --- FUNCIÓN 3: STARSHIP & TOOLS (LSD/BAT) ---
+    function install_cli_tools(){
+        # Starship
+        if ! command -v starship &> /dev/null; then
+            curl -sS https://starship.rs/install.sh | sh -s -- -y > /dev/null 2>&1
+        fi
+        
+        # Inyectar Starship en .zshrc (Idempotente)
+        if ! grep -q "starship init zsh" ~/.zshrc; then
+            echo 'eval "$(starship init zsh)"' >> ~/.zshrc
+        fi
+        
+        # Copiar config de starship
+        cp -f dotfiles/starship.toml ~/.config/ 2>/dev/null
+
+        # LSD y BAT
+        sudo apt install lsd bat -y -q > /dev/null 2>&1
+        
+        # Fix para bat en Debian/Kali (batcat -> bat)
+        if command -v batcat &> /dev/null; then
+            sudo ln -sf /usr/bin/batcat /usr/local/bin/bat
+        fi
+    }
+
+    # --- FUNCIÓN 4: ALIASES ---
+    function inject_aliases(){
+        # Usamos un marcador para saber si ya escribimos los aliases
+        if ! grep -q "# --- Phantom Aliases ---" ~/.zshrc; then
+            cat <<EOF >> ~/.zshrc
+
+# --- Phantom Aliases ---
+alias ll='lsd -lh --group-dirs=first'
+alias la='lsd -a --group-dirs=first'
+alias l='lsd --group-dirs=first'
+alias lla='lsd -lha --group-dirs=first'
+alias ls='lsd --group-dirs=first'
+alias cat='bat'
+EOF
+        fi
+    }
+
+    # --- FUNCIÓN 5: TARGET SCRIPT ---
+    function setup_target_tool(){
+        if [ -f "dotfiles/target.sh" ]; then
+            sudo cp -f dotfiles/target.sh /usr/local/bin/target
+            sudo chmod +x /usr/local/bin/target
+        fi
+    }
+
+    # --- EJECUCIÓN DEL FLUJO ---
+    execute_process "install_zsh_core" "Deploying Zsh Core & Plugins"
+    execute_process "setup_kitty_visuals" "Installing Kitty & NerdFonts"
+    execute_process "install_cli_tools" "Installing Starship, Lsd & Bat"
+    execute_process "inject_aliases" "Configuring Advanced Aliases"
+    execute_process "setup_target_tool" "Initializing Target System"
+
+    # --- CAMBIO DE SHELL ---
+    if [ "$SHELL" != "/usr/bin/zsh" ]; then
+        sudo chsh -s /usr/bin/zsh "$USER" > /dev/null 2>&1
+    fi
+
+    echo -e "\n${greenColour}[✔] Phantom Terminal Deployed.${endColour}"
+    echo -e "${grayColour}    Restart your session or type 'zsh' to enter the void.${endColour}\n"
 }
 
-function picom_modes(){
-  # Cabecera Cyberpunk
-  echo -e "\n${turquoiseColour}/// SYSTEM CONFIGURATION :: COMPOSITOR PICOM :${endColour}\n"
 
-  # --- Opción 1: QUALITY ---
-  echo -e "\n  ${greenColour}❱ 1 ❰${endColour} ${purpleColour}AESTHETIC MODE${endColour}"
-  
-  # --- Opción 2: PERFORMANCE ---
-  echo -e "\n  ${greenColour}❱ 2 ❰${endColour} ${purpleColour}PERFORMANCE MODE${endColour}"
-  
-  # Prompt estilo terminal
-  echo -ne "\n${limaColour}┌──(select${endColour}${grayColour}::${endColour}${purpleColour}picom${endColour}${limaColour})${endColour}"
-  echo -ne "\n${limaColour}└─${endColour}${greenColour}>>${endColour} "
-  read output_blur
-  
-  # Creamos el directorio (usando -p para evitar errores)
-  mkdir -p ~/.config/picom 
-  
-  if [[ $output_blur -eq 1 ]]; then
-    #/bin/cat dotfiles/picom/picom_quality > ~/.config/picom/picom.conf
-    echo -e "\n${limaColour}[ Quality Mode Selected ]"
-  elif [[ $output_blur -eq 2 ]]; then 
-    #/bin/cat dotfiles/picom/picom_performance > ~/.config/picom/picom.conf
-    echo -e "\n${limaColour}[ Performance Mode Selected ]"
-  else 
-    echo -e "\n${redColour}[!] Invalid option. You have to select a number! [1-2]${endColour}"
-    exit 1
-  fi
-
-  sleep 10
-
-}
 
 function nvim_installation(){
     echo -e "\n${turquoiseColour} /// SYSTEM INSTALLATION :: NEOVIM ${endColour}\n"
@@ -489,10 +549,83 @@ function nvim_installation(){
     
     # Pequeño truco: Si 'boxes' no está instalado, usa 'cat' para que no de error el script
     if command -v boxes &> /dev/null; then
-        echo -e "${limaColour}[+] Use 'nvim' to start. First launch will install plugins automatically.${endColour}" | boxes -d stone
+        echo -e "${limaColour}[+] Use '${purpleColour}nvim${endColour}${limaColour}' to start. First launch will install plugins automatically.${endColour}" | boxes -d stone
     else
         echo -e "${purpleColour}[+] ${limaColour}Use 'nvim' to start. First launch will install plugins automatically.${endColour}"
     fi
+}
+
+function core_stabilization(){
+
+
+  function picom_modes(){
+    # Cabecera Cyberpunk
+    echo -e "\n${turquoiseColour}/// SYSTEM CONFIGURATION :: COMPOSITOR PICOM :${endColour}\n"
+
+    # --- Opción 1: QUALITY ---
+    echo -e "\n  ${greenColour}❱ 1 ❰${endColour} ${purpleColour}AESTHETIC MODE${endColour}"
+    
+    # --- Opción 2: PERFORMANCE ---
+    echo -e "\n  ${greenColour}❱ 2 ❰${endColour} ${purpleColour}PERFORMANCE MODE${endColour}"
+    
+    # Prompt estilo terminal
+    echo -ne "\n${limaColour}┌──(select${endColour}${grayColour}::${endColour}${purpleColour}picom${endColour}${limaColour})${endColour}"
+    echo -ne "\n${limaColour}└─${endColour}${greenColour}>>${endColour} "
+    read output_blur
+    
+    # Creamos el directorio (usando -p para evitar errores)
+    mkdir -p ~/.config/picom 
+    
+    if [[ $output_blur -eq 1 ]]; then
+      /bin/cat dotfiles/picom/picom_quality > ~/.config/picom/picom.conf
+      echo -e "\n${limaColour}[ Quality Mode Selected ]"
+    elif [[ $output_blur -eq 2 ]]; then 
+      /bin/cat dotfiles/picom/picom_performance > ~/.config/picom/picom.conf
+      echo -e "\n${limaColour}[ Performance Mode Selected ]"
+    else 
+      echo -e "\n${redColour}[!] Invalid option. You have to select a number! [1-2]${endColour}"
+      exit 1
+    fi
+
+
+  }
+
+  function bspwm_config(){
+    # Cabecera Cyberpunk
+    echo -e "\n${turquoiseColour}/// SYSTEM CONFIGURATION :: BSPWM :${endColour}\n"
+
+    # --- Opción 1: QUALITY ---
+    echo -e "\n  ${greenColour}❱ 1 ❰${endColour} ${purpleColour}ADD TERMINAL LINE${endColour}"
+    
+    # --- Opción 2: PERFORMANCE ---
+    echo -e "\n  ${greenColour}❱ 2 ❰${endColour} ${purpleColour}QUIT TERMINAL LINE${endColour}"
+    
+    # Prompt estilo terminal
+    echo -ne "\n${limaColour}┌──(select${endColour}${grayColour}::${endColour}${purpleColour}bspwm${endColour}${limaColour})${endColour}"
+    echo -ne "\n${limaColour}└─${endColour}${greenColour}>>${endColour} "
+    read output_blur
+    
+    if [[ $output_blur -eq 1 ]]; then
+      /bin/cat dotfiles/bspwm/bspwmrc > ~/.config/bspwm/bspwmrc
+      echo -e "\n${limaColour}[ TERMINAL LINE SELECTED ]"
+    elif [[ $output_blur -eq 2 ]]; then 
+      /bin/cat dotfiles/bspwm/bspwmrc_no_line > ~/.config/bspwm/bspwmrc
+      echo -e "\n${limaColour}[ NO TERMINAL LINE SELECTED ]"
+    else 
+      echo -e "\n${redColour}[!] Invalid option. You have to select a number! [1-2]${endColour}"
+      exit 1
+    fi
+
+  }
+
+  function options_core(){
+    echo -e "${lightCyanColour}▌ 1 ▐${endColour} ${limaColour}Picom"
+    echo -e "${lightCyanColour}▌ 2 ▐${endColour} ${limaColour}Bspwm"
+    echo -e "${lightCyanColour}▌ 3 ▐${endColour} ${limaColour}Wallpapers"
+  }
+
+
+
 }
 
 
@@ -520,7 +653,7 @@ function select_options(){
   if [[ $output_show -eq 1 ]]; then
     full_installation
   elif [[ $output_show -eq 2 ]]; then 
-    terminal_strike
+    phatom_terminal
   elif [[ $output_show -eq 3 ]]; then 
      pwnbox_mode
   elif [[ $output_show -eq 4 ]]; then 
@@ -556,13 +689,14 @@ function helpPanel(){
 
 declare -i parameter_counter=0 
 
-while getopts "oftpnh" arg; do
+while getopts "oftpnch" arg; do
   case $arg in
     o) let parameter_counter+=1;;
     f) let parameter_counter+=2;;
     t) let parameter_counter+=3;;
     p) let parameter_counter+=4;;
     n) let parameter_counter+=5;;
+    c) let parameter_counter+=6;;
     h) ;;
   esac
 done
@@ -572,11 +706,13 @@ if [[ $parameter_counter -eq 1 ]]; then
 elif [[ $parameter_counter -eq 2 ]]; then 
   full_installation
 elif [[ $parameter_counter -eq 3 ]]; then 
-  terminal_strike
+  phatom_terminal
 elif [[ $parameter_counter -eq 4 ]]; then 
   pwnbox_mode
 elif [[ $parameter_counter -eq 5 ]]; then 
   nvim_installation 
+elif [[ $parameter_counter -eq 6 ]]; then
+  core_stabilization
 else 
   helpPanel
 fi 
