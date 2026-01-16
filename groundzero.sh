@@ -301,7 +301,7 @@ function pwnbox_mode(){
 
     # Target
     # Asumo que target.sh está en 'dotfiles/bin/' o en la raíz, ajusta la ruta origen si es necesario
-    execute_process "sudo cp dotfiles/bin/target /usr/local/bin/target && sudo chmod +x /usr/local/bin/target" "Setting up target.sh"
+    execute_process "sudo cp dotfiles/bin/target.sh /usr/local/bin/target && sudo chmod +x /usr/local/bin/target" "Setting up target.sh"
 
     # Network Recon & Root Shadow
     # Creamos carpeta temporal o Tools para clonar, instalar y limpiar
@@ -384,7 +384,7 @@ function picom_modes(){
 
 
 function nvim_installation(){
-    echo -e "\n${turquoiseColour}[+] INITIATING NEOVIM FORGE...${endColour}\n"
+    echo -e "\n${turquoiseColour}// INITIATING NEOVIM INSTALLATION...${endColour}\n"
 
     # --- Lógica 1: Instalación del Binario (Root) ---
     function install_nvim_binary(){
@@ -420,8 +420,8 @@ function nvim_installation(){
     execute_process "install_nvim_binary" "Downloading & Installing Neovim Binary"
     execute_process "deploy_nvchad_config" "Deploying NvChad Configuration (Backup included)"
 
-    echo -e "\n${greenColour}[✔] Neovim Setup Complete.${endColour}"
-    echo -e "${grayColour}    Use 'nvim' to start. First launch will install plugins automatically.${endColour}"
+    echo -e "\n${greenColour}[✔]${endColour}${grayColour} Neovim Setup Complete.${endColour}"
+    echo -e "${limaColour}Use 'nvim' to start. First launch will install plugins automatically.${endColour}" | boxes -d 
 }
 
 function options(){
