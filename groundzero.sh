@@ -745,7 +745,7 @@ function core_stabilization(){
         echo -e "\n${lightCyanColour}  ▌ 0 ▐${endColour} ${redColour}Exit to Shell${endColour}"
 
         echo -ne "\n${limaColour}┌──(core${endColour}${grayColour}::${endColour}${purpleColour}menu${endColour}${limaColour})${endColour}"
-        echo -ne "\n${limaColour}└─${endColour}${greenColour}>>${endColour} "
+        echo -ne "\n${limaColour}└─${endColour}${greenColour}❱${endColour} "
         read core_choice
 
         case $core_choice in
