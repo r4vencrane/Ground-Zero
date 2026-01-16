@@ -653,7 +653,7 @@ function select_options(){
   if [[ $output_show -eq 1 ]]; then
     full_installation
   elif [[ $output_show -eq 2 ]]; then 
-    phatom_terminal
+    phantom_terminal
   elif [[ $output_show -eq 3 ]]; then 
      pwnbox_mode
   elif [[ $output_show -eq 4 ]]; then 
@@ -706,7 +706,7 @@ if [[ $parameter_counter -eq 1 ]]; then
 elif [[ $parameter_counter -eq 2 ]]; then 
   full_installation
 elif [[ $parameter_counter -eq 3 ]]; then 
-  phatom_terminal
+  phantom_terminal
 elif [[ $parameter_counter -eq 4 ]]; then 
   pwnbox_mode
 elif [[ $parameter_counter -eq 5 ]]; then 
