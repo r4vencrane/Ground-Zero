@@ -102,6 +102,7 @@ function execute_process() {
     fi
 }
 
+
 function request_sudo(){
     echo -e "${greenColour}[*]${purpleColour} Requesting sudo permissions...${endColour}"
     
@@ -382,47 +383,72 @@ function picom_modes(){
 
 }
 
-
 function nvim_installation(){
     echo -e "\n${turquoiseColour}// INITIATING NEOVIM INSTALLATION...${endColour}\n"
 
     # --- Lógica 1: Instalación del Binario (Root) ---
     function install_nvim_binary(){
-        # Limpieza previa
+        # 1. Limpieza preventiva (Borrar residuos de intentos fallidos anteriores)
+        sudo rm -f /opt/nvim-linux-x86_64.tar.gz
+        
+        # 2. Si ya existe la carpeta descomprimida, la borramos para re-instalar limpio
         if [ -d "/opt/nvim-linux-x86_64" ]; then
             sudo rm -rf /opt/nvim-linux-x86_64
         fi
         
-        # Descarga e instalación silenciosa (-q en wget)
         cd /opt
+        
+        # 3. Descarga silenciosa
         sudo wget -q https://github.com/neovim/neovim/releases/download/stable/nvim-linux-x86_64.tar.gz
+        
+        # Verificación: Si wget falló (sin internet), no seguimos
+        if [ ! -f "nvim-linux-x86_64.tar.gz" ]; then return 1; fi
+
+        # 4. Instalación
         sudo tar -xf nvim-linux-x86_64.tar.gz
         sudo rm nvim-linux-x86_64.tar.gz
+        
+        # 5. Link (La 'f' sobreescribe si ya existe, perfecto para re-runs)
         sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
     }
 
     # --- Lógica 2: Configuración de NvChad (Usuario) ---
     function deploy_nvchad_config(){
-        # Backup automático si existe config
+        # 1. GESTIÓN DE BACKUPS (La corrección importante)
+        # Si existe un backup previo, lo borramos para dejar espacio al nuevo
+        if [ -d "$HOME/.config/nvim.bak" ]; then
+            rm -rf "$HOME/.config/nvim.bak"
+        fi
+
+        # Ahora sí, si existe config actual, la movemos a .bak (seguro)
         if [ -d "$HOME/.config/nvim" ]; then
             mv "$HOME/.config/nvim" "$HOME/.config/nvim.bak"
         fi
         
-        # Limpiar cache antigua para evitar errores de carga
+        # 2. Limpieza de Cache (Vital para NvChad al reinstalar)
         rm -rf "$HOME/.local/share/nvim"
+        rm -rf "$HOME/.cache/nvim"
         
-        # Clonar NvChad silenciosamente (-q)
+        # 3. Clonar NvChad
         git clone -q https://github.com/NvChad/starter "$HOME/.config/nvim"
     }
 
-    # --- EJECUCIÓN CON TU WRAPPER ---
-    # Pasamos el nombre de la función y la descripción
+    # --- EJECUCIÓN ---
     execute_process "install_nvim_binary" "Downloading & Installing Neovim Binary"
-    execute_process "deploy_nvchad_config" "Deploying NvChad Configuration (Backup included)"
+    execute_process "deploy_nvchad_config" "Deploying NvChad Config (Auto-Backup)"
 
+    # Mensaje Final (Validando si boxes está instalado)
     echo -e "\n${greenColour}[✔]${endColour}${grayColour} Neovim Setup Complete.${endColour}"
-    echo -e "${limaColour}Use 'nvim' to start. First launch will install plugins automatically.${endColour}" | boxes -d 
+    
+    # Pequeño truco: Si 'boxes' no está instalado, usa 'cat' para que no de error el script
+    if command -v boxes &> /dev/null; then
+        echo -e "${limaColour} [+] Use 'nvim' to start. First launch will install plugins automatically.${endColour}" | boxes -d stone
+    else
+        echo -e "${limaColour} [+] Use 'nvim' to start. First launch will install plugins automatically.${endColour}"
+    fi
 }
+
+
 
 function options(){
   echo -e "${lightCyanColour}▌ 1 ▐${endColour} ${limaColour}Full Setup"
