@@ -182,8 +182,8 @@ function install_dotfiles(){
   mkdir -p ~/.config/bspwm
   mkdir -p ~/.config/sxhkd
   mkdir -p ~/.config/scripts
+  mkdir -p ~/.config/picom 
   mkdir -p ~/.config/bin
-  mkdir -p ~/.config/picom
   mkdir -p ~/.config/polybar
   mkdir -p ~/.config/rofi
   mkdir -p ~/.config/kitty
@@ -196,7 +196,7 @@ function install_dotfiles(){
   cp dotfiles/bin/* ~/.config/bin/ # Asegúrate que 'target' es el nombre correcto del binario/script
   
   # Picom Config
-  /bin/cat dotfiles/picom/picom_home > ~/.config/picom/picom.conf
+  /bin/cat dotfiles/picom/picom_performance > ~/.config/picom/picom.conf
 
   # Polybar Config
   cp -r dotfiles/polybar/* ~/.config/polybar/
@@ -230,6 +230,8 @@ function install_fonts_themes(){
 
 function full_installation(){ 
   echo -e "\n${turquoiseColour}$(for i in $(seq 1 32); do echo -n '='; done)[::] Full Installation [::]$(for i in $(seq 1 31); do echo -n "="; done)${endColour}\n"
+  picom_modes
+  sleep 10
   request_sudo 
   execute_process "install_dependencies" "System Dependencies"
   execute_process "compile_environment" "Compiling Environment"
@@ -318,6 +320,67 @@ function pwnbox_mode(){
     echo -e "${limaColour}[+]${endColour} ${grayColour}Now you can open ${blueColour}kitty${endColour} ${grayColour}terminal${endColour}\n"
 }
 
+function picom_modes_test(){
+  echo -e "\n${turquoiseColour}// COMPOSITOR SETUP (Picom) :${endColour}\n"
+
+  echo -e "\n  ${purpleColour}❱ 1 ❰${endColour} ${turquoiseColour}AESTHETIC MODE${endColour}"
+ 
+  # Opción 2: Performance
+  echo -e "\n  ${purpleColour}❱ 2 ❰${endColour} ${turquoiseColour}PERFORMANCE MODE${endColour}"
+  
+  # Prompt estilo terminal
+  echo -ne "\n${limaColour}┌──(select${endColour}${grayColour}::${endColour}${purpleColour}picom${endColour}${limaColour})${endColour}"
+  echo -ne "\n${limaColour}└─${endColour}${grayColour}>>${endColour} "
+  read output_blur
+
+  #mkdir -p ~/.config/picom 
+
+  if [[ $output_blur -eq 1 ]]; then
+    #/bin/cat dotfiles/picom/picom_quality > ~/.config/picom/picom.conf
+    echo -e "\n${limaColour}[ Quality Mode Selected ]"
+  elif [[ $output_blur -eq 2 ]]; then 
+    #/bin/cat dotfiles/picom/picom_performance > ~/.config/picom/picom.conf
+    echo -e "\n${limaColour}[ Performance Mode Selected ]"
+  else 
+    echo -e "\n${redColour}[!] You have to select a number! [1-2]${endColour}"
+  fi
+
+  sleep 10
+
+}
+
+function picom_modes(){
+  # Cabecera Cyberpunk
+  echo -e "\n${turquoiseColour}/// SYSTEM CONFIGURATION :: COMPOSITOR PICOM :${endColour}\n"
+
+  # --- Opción 1: QUALITY ---
+  echo -e "\n  ${greenColour}❱ 1 ❰${endColour} ${purpleColour}AESTHETIC MODE${endColour}"
+  
+  # --- Opción 2: PERFORMANCE ---
+  echo -e "\n  ${greenColour}❱ 2 ❰${endColour} ${purpleColour}PERFORMANCE MODE${endColour}"
+  
+  # Prompt estilo terminal
+  echo -ne "\n${limaColour}┌──(select${endColour}${grayColour}::${endColour}${purpleColour}picom${endColour}${limaColour})${endColour}"
+  echo -ne "\n${limaColour}└─${endColour}${greenColour}>>${endColour} "
+  read output_blur
+  
+  # Creamos el directorio (usando -p para evitar errores)
+  mkdir -p ~/.config/picom 
+  
+  if [[ $output_blur -eq 1 ]]; then
+    #/bin/cat dotfiles/picom/picom_quality > ~/.config/picom/picom.conf
+    echo -e "\n${limaColour}[ Quality Mode Selected ]"
+  elif [[ $output_blur -eq 2 ]]; then 
+    #/bin/cat dotfiles/picom/picom_performance > ~/.config/picom/picom.conf
+    echo -e "\n${limaColour}[ Performance Mode Selected ]"
+  else 
+    echo -e "\n${redColour}[!] Invalid option. You have to select a number! [1-2]${endColour}"
+    exit 1
+  fi
+
+  sleep 10
+
+}
 
 
 function options(){
@@ -366,6 +429,7 @@ function helpPanel(){
   echo -e "  ${turquoiseColour}-t${endColour}          ➜ ${grayColour}Phantom Terminal. Only CLI tools: ${greenColour}Zsh, Starship Powerline, Bat, Lsd, Kitty. ${endColour}"
   echo -e "  ${turquoiseColour}-p${endColour}          ➜ ${grayColour}Pwnbox Mode. ${greenColour}Install Terminal Strike in Pwnbox${endColour}"
   echo -e "  ${turquoiseColour}-n${endColour}          ➜ ${grayColour}Install Nvim with Nvchad${endColour}"
+  echo -e "  ${turquoiseColour}-a${endColour}          ➜ ${redColour}Aftermath Center${endColour}"
   
   echo -e "\n${limaColour}[+]${endColour} ${grayColour}Examples:${endColour}"
   echo -e "\t${greenColour}./groundzero.sh -f${endColour} (Recommended for fresh installs)"
