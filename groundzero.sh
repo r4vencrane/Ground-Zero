@@ -383,6 +383,47 @@ function picom_modes(){
 }
 
 
+function nvim_installation(){
+    echo -e "\n${turquoiseColour}[+] INITIATING NEOVIM FORGE...${endColour}\n"
+
+    # --- Lógica 1: Instalación del Binario (Root) ---
+    function install_nvim_binary(){
+        # Limpieza previa
+        if [ -d "/opt/nvim-linux-x86_64" ]; then
+            sudo rm -rf /opt/nvim-linux-x86_64
+        fi
+        
+        # Descarga e instalación silenciosa (-q en wget)
+        cd /opt
+        sudo wget -q https://github.com/neovim/neovim/releases/download/stable/nvim-linux-x86_64.tar.gz
+        sudo tar -xf nvim-linux-x86_64.tar.gz
+        sudo rm nvim-linux-x86_64.tar.gz
+        sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
+    }
+
+    # --- Lógica 2: Configuración de NvChad (Usuario) ---
+    function deploy_nvchad_config(){
+        # Backup automático si existe config
+        if [ -d "$HOME/.config/nvim" ]; then
+            mv "$HOME/.config/nvim" "$HOME/.config/nvim.bak"
+        fi
+        
+        # Limpiar cache antigua para evitar errores de carga
+        rm -rf "$HOME/.local/share/nvim"
+        
+        # Clonar NvChad silenciosamente (-q)
+        git clone -q https://github.com/NvChad/starter "$HOME/.config/nvim"
+    }
+
+    # --- EJECUCIÓN CON TU WRAPPER ---
+    # Pasamos el nombre de la función y la descripción
+    execute_process "install_nvim_binary" "Downloading & Installing Neovim Binary"
+    execute_process "deploy_nvchad_config" "Deploying NvChad Configuration (Backup included)"
+
+    echo -e "\n${greenColour}[✔] Neovim Setup Complete.${endColour}"
+    echo -e "${grayColour}    Use 'nvim' to start. First launch will install plugins automatically.${endColour}"
+}
+
 function options(){
   echo -e "${lightCyanColour}▌ 1 ▐${endColour} ${limaColour}Full Setup"
   echo -e "${lightCyanColour}▌ 2 ▐${endColour} ${limaColour}Phantom Terminal"
@@ -417,6 +458,7 @@ function select_options(){
   
 }
 
+
 function helpPanel(){
   echo -e "$banner" 
   echo -e "\n${limaColour}$(for in in $(seq 1 120); do echo -n '='; done)"
@@ -427,13 +469,14 @@ function helpPanel(){
   echo -e "  ${turquoiseColour}-o${endColour}          ➜ ${grayColour}Show Installation Options ${purpleColour}(Interactive Menu)${endColour}"
   echo -e "  ${turquoiseColour}-f${endColour}          ➜ ${grayColour}Full Setup. Includes: ${greenColour}Bspwm, Polybar, Picom, Rofi, Zsh ${endColour}"
   echo -e "  ${turquoiseColour}-t${endColour}          ➜ ${grayColour}Phantom Terminal. Only CLI tools: ${greenColour}Zsh, Starship Powerline, Bat, Lsd, Kitty. ${endColour}"
-  echo -e "  ${turquoiseColour}-p${endColour}          ➜ ${grayColour}Pwnbox Mode. ${greenColour}Install Terminal Strike in Pwnbox${endColour}"
+  echo -e "  ${turquoiseColour}-p${endColour}          ➜ ${grayColour}Pwnbox Mode. ${greenColour}Target: HTB/Pwnbox Environment${endColour}"
   echo -e "  ${turquoiseColour}-n${endColour}          ➜ ${grayColour}Install Nvim with Nvchad${endColour}"
-  echo -e "  ${turquoiseColour}-a${endColour}          ➜ ${redColour}Aftermath Center${endColour}"
+  echo -e "  ${turquoiseColour}-c${endColour}          ➜ ${redColour}Core Stabilization${endColour}. ${purpleColour}(Interactive Menu)${endColour}"
   
   echo -e "\n${limaColour}[+]${endColour} ${grayColour}Examples:${endColour}"
   echo -e "\t${greenColour}./groundzero.sh -f${endColour} (Recommended for fresh installs)"
   echo -e "\t${greenColour}./groundzero.sh -t${endColour} (Only shell configuration)"
+  echo -e "\t${greenColour}./groundzero.sh -c${endColour} (Post Install: Visuals, Borders, Wallpapers)"
 
 }
 
