@@ -438,13 +438,13 @@ function nvim_installation(){
     execute_process "deploy_nvchad_config" "Deploying NvChad Config (Auto-Backup)"
 
     # Mensaje Final (Validando si boxes está instalado)
-    echo -e "\n${greenColour}//${endColour}${turquoiseColour} NEOVIM SETUP COMPLETED${endColour}"
+    echo -e "\n${turquoiseColour} /// NEOVIM SETUP COMPLETED \n${endColour}"
     
     # Pequeño truco: Si 'boxes' no está instalado, usa 'cat' para que no de error el script
     if command -v boxes &> /dev/null; then
-        echo -e "\n${limaColour}[+] Use 'nvim' to start. First launch will install plugins automatically.${endColour}" | boxes -d stone
+        echo -e "${limaColour}[+] Use 'nvim' to start. First launch will install plugins automatically.${endColour}" | boxes -d stone
     else
-        echo -e "\n${limaColour}[+] Use 'nvim' to start. First launch will install plugins automatically.${endColour}"
+        echo -e "${limaColour}[+] Use 'nvim' to start. First launch will install plugins automatically.${endColour}"
     fi
 }
 
