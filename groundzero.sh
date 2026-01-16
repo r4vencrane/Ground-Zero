@@ -554,99 +554,210 @@ function nvim_installation(){
         echo -e "${purpleColour}[+] ${limaColour}Use 'nvim' to start. First launch will install plugins automatically.${endColour}"
     fi
 }
-
 function core_stabilization(){
 
+    # --- SUB-FUNCIÓN: PICOM CONFIG ---
+    function picom_modes(){
+        echo -e "\n${turquoiseColour}/// SYSTEM CONFIGURATION :: COMPOSITOR PICOM :${endColour}\n"
+        echo -e "  ${greenColour}❱ 1 ${endColour} ${purpleColour}AESTHETIC MODE${endColour}    ${grayColour}(Blur, Animations, Round Corners)${endColour}"
+        echo -e "  ${greenColour}❱ 2 ${endColour} ${purpleColour}PERFORMANCE MODE${endColour}  ${grayColour}(No Blur, Sharp Corners, Max FPS)${endColour}"
+        echo -e "  ${greenColour}❱ 0 ${endColour} ${redColour}Return${endColour}"
 
-  function picom_modes(){
-    # Cabecera Cyberpunk
-    echo -e "\n${turquoiseColour}/// SYSTEM CONFIGURATION :: COMPOSITOR PICOM :${endColour}\n"
+        echo -ne "\n${limaColour}┌──(select${endColour}${grayColour}::${endColour}${purpleColour}picom${endColour}${limaColour})${endColour}"
+        echo -ne "\n${limaColour}└─${endColour}${greenColour}>>${endColour} "
+        read picom_choice
 
-    # --- Opción 1: QUALITY ---
-    echo -e "\n  ${greenColour}❱ 1 ❰${endColour} ${purpleColour}AESTHETIC MODE${endColour}"
+        case $picom_choice in
+            1)
+                # Validamos que el archivo fuente exista
+                if [ -f "dotfiles/picom/picom_quality" ]; then
+                    cp -f dotfiles/picom/picom_quality ~/.config/picom/picom.conf
+                    echo -e "\n${limaColour}[*] Applying Aesthetic Mode...${endColour}"
+                    # REINICIO EN CALIENTE (HOT RELOAD)
+                    killall picom 2>/dev/null
+                    sleep 1
+                    picom -b --config ~/.config/picom/picom.conf 2>/dev/null
+                    echo -e "${greenColour}[✔] Visuals updated.${endColour}"
+                else
+                    echo -e "\n${redColour}[!] Source file 'dotfiles/picom/picom_quality' not found.${endColour}"
+                fi
+                ;;
+            2)
+                if [ -f "dotfiles/picom/picom_performance" ]; then
+                    cp -f dotfiles/picom/picom_performance ~/.config/picom/picom.conf
+                    echo -e "\n${limaColour}[*] Applying Performance Mode...${endColour}"
+                    # REINICIO EN CALIENTE
+                    killall picom 2>/dev/null
+                    sleep 1
+                    picom -b --config ~/.config/picom/picom.conf 2>/dev/null
+                    echo -e "${greenColour}[✔] Performance optimized.${endColour}"
+                else
+                    echo -e "\n${redColour}[!] Source file not found.${endColour}"
+                fi
+                ;;
+            0) return ;;
+            *) echo -e "\n${redColour}[!] Invalid option.${endColour}"; sleep 1 ;;
+        esac
+    }
+    function bspwm_config(){
+        # Definimos la ruta del archivo de configuración real
+        BSPWM_CONFIG="$HOME/.config/bspwm/bspwmrc"
+
+        echo -e "\n${turquoiseColour}/// SYSTEM CONFIGURATION :: BSPWM BORDERS :${endColour}\n"
+        echo -e "  ${greenColour}❱ 1 ❰${endColour} ${purpleColour}ENABLE BORDERS${endColour}      ${grayColour}(Standard Width: 2)${endColour}"
+        echo -e "  ${greenColour}❱ 2 ❰${endColour} ${purpleColour}DISABLE BORDERS${endColour}     ${grayColour}(Clean/Full: 0)${endColour}"
+        echo -e "  ${greenColour}❱ 0 ❰${endColour} ${redColour}Return${endColour}"
+
+        echo -ne "\n${limaColour}┌──(select${endColour}${grayColour}::${endColour}${purpleColour}borders${endColour}${limaColour})${endColour}"
+        echo -ne "\n${limaColour}└─${endColour}${greenColour}>>${endColour} "
+        read bspwm_choice
+
+        case $bspwm_choice in
+            1)
+                if [ -f "$BSPWM_CONFIG" ]; then
+                    echo -e "\n${limaColour}[*] Activating containment field (Borders)...${endColour}"
+                    
+                    # 1. SED QUIRÚRGICO:
+                    # Busca la línea que configura el ancho y ponle '2'
+                    sed -i 's/^bspc config border_width .*/bspc config border_width 2/g' "$BSPWM_CONFIG"
+                    
+                    # 2. HOT RELOAD (Aplicar cambios sin salir)
+                    bspc wm -r 
+                    
+                    echo -e "${greenColour}[✔] Borders enabled (Width: 2).${endColour}"
+                else
+                    echo -e "\n${redColour}[!] Critical: bspwmrc not found at $BSPWM_CONFIG${endColour}"
+                fi
+                ;;
+            2)
+                if [ -f "$BSPWM_CONFIG" ]; then
+                    echo -e "\n${limaColour}[*] Deactivating containment field (No Borders)...${endColour}"
+                    
+                    # 1. SED QUIRÚRGICO:
+                    # Busca la línea y ponle '0'
+                    sed -i 's/^bspc config border_width .*/bspc config border_width 0/g' "$BSPWM_CONFIG"
+                    
+                    # 2. HOT RELOAD
+                    bspc wm -r
+                    
+                    echo -e "${greenColour}[✔] Borders removed (Clean Mode).${endColour}"
+                else
+                    echo -e "\n${redColour}[!] Critical: bspwmrc not found at $BSPWM_CONFIG${endColour}"
+                fi
+                ;;
+            0) return ;;
+            *) echo -e "\n${redColour}[!] Invalid option.${endColour}"; sleep 1 ;;
+        esac
+    }
+    # --- SUB-FUNCIÓN: BSPWM CONFIG ---
     
-    # --- Opción 2: PERFORMANCE ---
-    echo -e "\n  ${greenColour}❱ 2 ❰${endColour} ${purpleColour}PERFORMANCE MODE${endColour}"
-    
-    # Prompt estilo terminal
-    echo -ne "\n${limaColour}┌──(select${endColour}${grayColour}::${endColour}${purpleColour}picom${endColour}${limaColour})${endColour}"
-    echo -ne "\n${limaColour}└─${endColour}${greenColour}>>${endColour} "
-    read output_blur
-    
-    # Creamos el directorio (usando -p para evitar errores)
-    mkdir -p ~/.config/picom 
-    
-    if [[ $output_blur -eq 1 ]]; then
-      /bin/cat dotfiles/picom/picom_quality > ~/.config/picom/picom.conf
-      echo -e "\n${limaColour}[ Quality Mode Selected ]"
-    elif [[ $output_blur -eq 2 ]]; then 
-      /bin/cat dotfiles/picom/picom_performance > ~/.config/picom/picom.conf
-      echo -e "\n${limaColour}[ Performance Mode Selected ]"
-    else 
-      echo -e "\n${redColour}[!] Invalid option. You have to select a number! [1-2]${endColour}"
-      exit 1
-    fi
+    # --- SUB-FUNCIÓN: WALLPAPERS ---
+    function background_rads(){
+        # Definimos rutas clave
+        WALLPAPER_DIR="$HOME/.config/wallpapers"
+        BSPWM_CONFIG="$HOME/.config/bspwm/bspwmrc"
 
+        # Cabecera estética
+        echo -e "\n${turquoiseColour}/// SYSTEM CONFIGURATION :: BACKGROUND RADS :${endColour}\n"
+        echo -e "${grayColour}Scanning containment zone for available shields...${endColour}\n"
 
-  }
+        # 1. Validar que el directorio existe
+        if [ ! -d "$WALLPAPER_DIR" ]; then
+            echo -e "${redColour}[!] Critical Error: Wallpaper directory missing ($WALLPAPER_DIR)${endColour}"
+            return 1
+        fi
 
-  function bspwm_config(){
-    # Cabecera Cyberpunk
-    echo -e "\n${turquoiseColour}/// SYSTEM CONFIGURATION :: BSPWM :${endColour}\n"
+        # 2. Crear array con las imágenes (ignorando si no hay de algún tipo)
+        shopt -s nullglob
+        wallpapers=("$WALLPAPER_DIR"/*.png "$WALLPAPER_DIR"/*.jpg "$WALLPAPER_DIR"/*.jpeg)
+        shopt -u nullglob
 
-    # --- Opción 1: QUALITY ---
-    echo -e "\n  ${greenColour}❱ 1 ❰${endColour} ${purpleColour}ADD TERMINAL LINE${endColour}"
-    
-    # --- Opción 2: PERFORMANCE ---
-    echo -e "\n  ${greenColour}❱ 2 ❰${endColour} ${purpleColour}QUIT TERMINAL LINE${endColour}"
-    
-    # Prompt estilo terminal
-    echo -ne "\n${limaColour}┌──(select${endColour}${grayColour}::${endColour}${purpleColour}bspwm${endColour}${limaColour})${endColour}"
-    echo -ne "\n${limaColour}└─${endColour}${greenColour}>>${endColour} "
-    read output_blur
-    
-    if [[ $output_blur -eq 1 ]]; then
-      /bin/cat dotfiles/bspwm/bspwmrc > ~/.config/bspwm/bspwmrc
-      echo -e "\n${limaColour}[ TERMINAL LINE SELECTED ]"
-    elif [[ $output_blur -eq 2 ]]; then 
-      /bin/cat dotfiles/bspwm/bspwmrc_no_line > ~/.config/bspwm/bspwmrc
-      echo -e "\n${limaColour}[ NO TERMINAL LINE SELECTED ]"
-    else 
-      echo -e "\n${redColour}[!] Invalid option. You have to select a number! [1-2]${endColour}"
-      exit 1
-    fi
+        # Validar si está vacío
+        if [ ${#wallpapers[@]} -eq 0 ]; then
+            echo -e "${redColour}[!] No visual artifacts found in the sector.${endColour}"
+            return 1
+        fi
 
-  }
+        # 3. Mostrar menú interactivo
+        i=1
+        for wall in "${wallpapers[@]}"; do
+            filename=$(basename "$wall")
+            echo -e "  ${purpleColour}▌ $i ▐${endColour} ${grayColour}$filename${endColour}"
+            let i++
+        done
+        
+        echo -e "  ${purpleColour}▌ 0 ▐${endColour} ${redColour}Return${endColour}"
 
-  function options_core(){
-    echo -e "${lightCyanColour}▌ 1 ▐${endColour} ${limaColour}Picom"
-    echo -e "${lightCyanColour}▌ 2 ▐${endColour} ${limaColour}Bspwm"
-    echo -e "${lightCyanColour}▌ 3 ▐${endColour} ${limaColour}Wallpapers"
-  }
+        # 4. Input del usuario
+        echo -ne "\n${limaColour}┌──(select${endColour}${grayColour}::${endColour}${purpleColour}wallpaper${endColour}${limaColour})${endColour}"
+        echo -ne "\n${limaColour}└─${endColour}${greenColour}>>${endColour} "
+        read choice
 
-  function select_options_core(){
-    echo -e "\n${limaColour}[+]${endColour} ${grayColour}Select an option:${endColour}\n"
-    options_core 
-    echo -ne "\n${purpleColour}[~]${endColour} ${grayColour}Install: ${endColour}"
-    read output_show
+        # 5. Procesar selección
+        # Si elige 0 o vacío, salimos
+        if [[ "$choice" == "0" || -z "$choice" ]]; then
+            return
+        fi
 
-    if [[ $output_show -eq 1 ]]; then
-      picom_modes
-    elif [[ $output_show -eq 2 ]]; then 
-      bspwm_config
-    elif [[ $output_show -eq 3 ]]; then 
-      set_wallpaper
-    else 
-      echo -e "\n${redColour}[!] You have to select a number! [1-3]${endColour}"
-    fi
-  
-  }
+        # Ajustar índice (Bash arrays empiezan en 0, nuestro menú en 1)
+        index=$((choice - 1))
 
-  select_options
+        # Verificar si el índice es válido
+        if [ "$index" -ge 0 ] && [ "$index" -lt "${#wallpapers[@]}" ]; then
+            selected_wall="${wallpapers[$index]}"
+            selected_name=$(basename "$selected_wall")
 
+            echo -e "\n${limaColour}[*] Deploying visual shield: $selected_name...${endColour}"
 
+            # A) CAMBIO INMEDIATO (Para que lo veas ya)
+            feh --bg-fill "$selected_wall"
 
+            # B) PERSISTENCIA (Editar bspwmrc para el reinicio)
+            # Usamos '|' como separador en sed porque las rutas tienen '/'
+            if grep -q "feh --bg-fill" "$BSPWM_CONFIG"; then
+                # Si la línea existe, la reemplazamos
+                sed -i "s|feh --bg-fill .*|feh --bg-fill $selected_wall &|g" "$BSPWM_CONFIG"
+            else
+                # Si no existe, la agregamos al final
+                echo "feh --bg-fill $selected_wall &" >> "$BSPWM_CONFIG"
+            fi
+
+            echo -e "${greenColour}[✔] Background stabilized and saved.${endColour}"
+            
+            # Pequeña pausa para apreciar el éxito
+            sleep 1.5
+        else
+            echo -e "\n${redColour}[!] Invalid coordinates (Wrong number).${endColour}"
+            sleep 1
+        fi
+    }
+
+    # --- LOOP PRINCIPAL DEL MENÚ (CORE) ---
+    while true; do
+        clear
+        echo -e "\n${turquoiseColour}$(printf '=%.0s' {1..45})${endColour}"
+        echo -e "         C O R E   S T A B I L I Z A T I O N"
+        echo -e "${turquoiseColour}$(printf '=%.0s' {1..45})${endColour}\n"
+
+        echo -e "${lightCyanColour}  ▌ 1 ▐${endColour} ${limaColour}Picom Compositor${endColour}   ${grayColour}(Blur & Performance)${endColour}"
+        echo -e "${lightCyanColour}  ▌ 2 ▐${endColour} ${limaColour}Bspwm Borders${endColour}      ${grayColour}(Decorations)${endColour}"
+        echo -e "${lightCyanColour}  ▌ 3 ▐${endColour} ${limaColour}Wallpapers${endColour}         ${grayColour}(Background Rads)${endColour}"
+        echo -e "\n${lightCyanColour}  ▌ 0 ▐${endColour} ${redColour}Exit to Shell${endColour}"
+
+        echo -ne "\n${limaColour}┌──(core${endColour}${grayColour}::${endColour}${purpleColour}menu${endColour}${limaColour})${endColour}"
+        echo -ne "\n${limaColour}└─${endColour}${greenColour}>>${endColour} "
+        read core_choice
+
+        case $core_choice in
+            1) picom_modes; echo -e "\n${grayColour}Press Enter to continue...${endColour}"; read ;;
+            2) bspwm_config; echo -e "\n${grayColour}Press Enter to continue...${endColour}"; read ;;
+            3) background_rads; echo -e "\n${grayColour}Press Enter to continue...${endColour}"; read ;;
+            0) break ;; # Rompe el bucle y sale
+            *) echo -e "\n${redColour}[!] Invalid Option.${endColour}"; sleep 1 ;;
+        esac
+    done
 }
+
 
 
 
