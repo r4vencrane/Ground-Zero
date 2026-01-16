@@ -128,25 +128,6 @@ function request_sudo(){
 }
 
 
-function install_dependencies_test(){ 
-
-  DEPENDENCIES=(
-        build-essential git vim xcb libxcb-util0-dev libxcb-ewmh-dev 
-        libxcb-randr0-dev libxcb-icccm4-dev libxcb-keysyms1-dev libxcb-xinerama0-dev 
-        libasound2-dev libxcb-xtest0-dev libxcb-shape0-dev libxcb-xkb-dev
-        libconfig-dev libdbus-1-dev libegl-dev libev-dev libgl-dev libepoxy-dev 
-        libpcre2-dev libpixman-1-dev libx11-xcb-dev libxcb1-dev libxcb-composite0-dev 
-        libxcb-damage0-dev libxcb-glx0-dev libxcb-image0-dev libxcb-present-dev 
-        libxcb-render0-dev libxcb-render-util0-dev libxcb-util-dev libxcb-xfixes0-dev 
-        meson ninja-build uthash-dev
-        polybar rofi feh kitty lsd bat boxes zsh curl wget
-    )
-
-    sudo apt update
-    sudo apt install "${DEPENDENCIES[@]}" -y 
-
-    sudo ln -s /usr/bin/batcat /usr/local/bin/bat
-}
 
 function install_dependencies(){ 
     # Dependencias divididas para lectura, pero se instalan juntas
@@ -210,36 +191,6 @@ function compile_environment(){
     rm -rf build 
 }
 
-function compile_environment_test(){
-  mkdir -p build 
-  cd build || exit 
-
-  if [ ! -d "bspwm" ]; then
-        git clone https://github.com/baskerville/bspwm.git
-  fi
-    
-  make -C bspwm
-  sudo make -C bspwm install
-  sudo cp bspwm/contrib/freedesktop/bspwm.desktop /usr/share/xsessions/
-
-  if [ ! -d "sxhkd" ]; then
-        git clone https://github.com/baskerville/sxhkd.git
-    fi
-    make -C sxhkd
-    sudo make -C sxhkd install
-
-  if [ ! -d "picom" ]; then
-        git clone https://github.com/yshui/picom.git  
-  fi
-  cd picom
-  meson setup --buildtype=release build
-  ninja -C build
-  sudo ninja -C build install
-  cd .. # Salir de picom
-
-  cd .. # Salir de carpeta build
-  rm -rf build # Limpieza
-}
 
 function install_dotfiles(){
     # Crear estructura de directorios (ignora si existen con -p)
@@ -271,42 +222,6 @@ function install_dotfiles(){
     chmod +x ~/.config/bin/* 2>/dev/null || true
 }
 
-function install_dotfiles_test(){
-  mkdir -p ~/.config/bspwm
-  mkdir -p ~/.config/sxhkd
-  mkdir -p ~/.config/scripts
-  mkdir -p ~/.config/picom 
-  mkdir -p ~/.config/bin
-  mkdir -p ~/.config/polybar
-  mkdir -p ~/.config/rofi
-  mkdir -p ~/.config/kitty
-  mkdir -p ~/.config/wallpapers
-
-  # Copiar configs (Asume que estás en la raíz del repo clonado)
-  cp dotfiles/bspwm/* ~/.config/bspwm/
-  cp dotfiles/sxhkd/* ~/.config/sxhkd/
-  cp dotfiles/scripts/* ~/.config/scripts/
-  cp dotfiles/bin/* ~/.config/bin/ # Asegúrate que 'target' es el nombre correcto del binario/script
-  
-  # Picom Config
-  /bin/cat dotfiles/picom/picom_performance > ~/.config/picom/picom.conf
-
-  # Polybar Config
-  cp -r dotfiles/polybar/* ~/.config/polybar/
-
-  # Rofi Config
-  cp -r dotfiles/rofi/* ~/.config/rofi/
-
-  # Kitty Config
-  cp dotfiles/kitty/* ~/.config/kitty/
-
-  # Wallpapers
-  cp assets/wallpapers/* ~/.config/wallpapers/
-
-  # Permisos de ejecución necesarios
-  chmod +x ~/.config/bspwm/bspwmrc
-  chmod +x ~/.config/scripts/*
-}
 
 function install_fonts_themes(){
     # Instalar Fuentes
@@ -340,23 +255,15 @@ function install_fonts_themes(){
     if [ "$SHELL" != "/usr/bin/zsh" ]; then
         sudo chsh -s /usr/bin/zsh "$USER"
     fi
+
+  sudo cp dotfiles/target.sh /usr/local/bin/target  
+  sudo chmod +x /usr/local/bin/target 
 }
 
-function install_fonts_themes_test(){
-  sudo cp assets/fonts/HackNerdFont* /usr/local/share/fonts/ 2>/dev/null 
-  sudo cp dotfiles/polybar/fonts/* /usr/share/fonts/truetype/ 2>/dev/null
-  
-  # Actualizar caché de fuentes
-  fc-cache -v > /dev/null 2>&1
-
-  curl -sS https://starship.rs/install.sh | sh -s -- -y
-  cp dotfiles/starship.toml ~/.config/
-  /bin/cat dotfiles/zshrc >> ~/.zshrc
-}
 
 function full_installation(){ 
     # Header estético
-    echo -e "\n${turquoiseColour}$(printf '=%.0s' {1..35}) [::] FULL INSTALLATION [::] $(printf '=%.0s' {1..35})${endColour}\n"
+    echo -e "\n${turquoiseColour}$(for i in $(seq 1 32); do echo -n '='; done)[::] /// FULL INSTALLATION [::]$(for i in $(seq 1 31); do echo -n "="; done)${endColour}\n"
     
     # Verificamos internet antes de empezar nada
     echo -e "${grayColour}[*] Checking connectivity...${endColour}"
@@ -370,23 +277,14 @@ function full_installation(){
     
     # Ejecución modular con execute_process
     execute_process "install_dependencies" "Installing System Dependencies"
-    execute_process "compile_environment" "Compiling Window Manager (BSPwm/Picom)"
-    execute_process "install_dotfiles" "Deploying Configuration Files (Dotfiles)"
+    execute_process "compile_environment" "Compiling Environment"
+    execute_process "install_dotfiles" "Deploying Configuration Files"
     execute_process "install_fonts_themes" "Setting up Shell & Aesthetics"
 
-    echo -e "\n${greenColour}[✔] Installation Complete.${endColour}"
-    echo -e "${grayColour}    Please reboot your system to enter the GroundZero environment.${endColour}\n"
+    echo -e "\n${turquoiseColour} /// Installation Complete.${endColour}\n"
+    echo -e "${purpleColour}[+]${limaColour} Please reboot your system to enter the GroundZero environment.${endColour}\n" | boxes -d stone 
 }
 
-function full_installation_test(){ 
-  echo -e "\n${turquoiseColour}$(for i in $(seq 1 32); do echo -n '='; done)[::] Full Installation [::]$(for i in $(seq 1 31); do echo -n "="; done)${endColour}\n"
-  request_sudo 
-  execute_process "install_dependencies" "System Dependencies"
-  execute_process "compile_environment" "Compiling Environment"
-  execute_process "install_dotfiles" "Files Configurations"
-  execute_process "install_fonts_themes" "Aesthetic and Shell"
-
-}
 
 function pwnbox_mode(){
     echo -e "\n${turquoiseColour}$(for i in $(seq 1 32); do echo -n '='; done)[::] Installing Phantom Terminal [::]$(for i in $(seq 1 31); do echo -n "="; done)${endColour}\n"
