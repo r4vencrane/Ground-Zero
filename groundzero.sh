@@ -559,12 +559,12 @@ function core_stabilization(){
     # --- SUB-FUNCIÓN: PICOM CONFIG ---
     function picom_modes(){
         echo -e "\n${turquoiseColour}/// SYSTEM CONFIGURATION :: COMPOSITOR PICOM :${endColour}\n"
-        echo -e "  ${greenColour}❱ 1 ${endColour} ${purpleColour}AESTHETIC MODE${endColour}    ${grayColour}(Blur, Animations, Round Corners)${endColour}"
-        echo -e "  ${greenColour}❱ 2 ${endColour} ${purpleColour}PERFORMANCE MODE${endColour}  ${grayColour}(No Blur, Sharp Corners, Max FPS)${endColour}"
+        echo -e "  ${greenColour}❱ 1 ${endColour} ${purpleColour}AESTHETIC MODE${endColour}    ${grayColour}(Blur)${endColour}"
+        echo -e "  ${greenColour}❱ 2 ${endColour} ${purpleColour}PERFORMANCE MODE${endColour}  ${grayColour}(No Blur)${endColour}"
         echo -e "  ${greenColour}❱ 0 ${endColour} ${redColour}Return${endColour}"
 
         echo -ne "\n${limaColour}┌──(select${endColour}${grayColour}::${endColour}${purpleColour}picom${endColour}${limaColour})${endColour}"
-        echo -ne "\n${limaColour}└─${endColour}${greenColour}>>${endColour} "
+        echo -ne "\n${limaColour}└─${endColour}${greenColour}❱${endColour} "
         read picom_choice
 
         case $picom_choice in
@@ -604,12 +604,12 @@ function core_stabilization(){
         BSPWM_CONFIG="$HOME/.config/bspwm/bspwmrc"
 
         echo -e "\n${turquoiseColour}/// SYSTEM CONFIGURATION :: BSPWM BORDERS :${endColour}\n"
-        echo -e "  ${greenColour}❱ 1 ❰${endColour} ${purpleColour}ENABLE BORDERS${endColour}      ${grayColour}(Standard Width: 2)${endColour}"
-        echo -e "  ${greenColour}❱ 2 ❰${endColour} ${purpleColour}DISABLE BORDERS${endColour}     ${grayColour}(Clean/Full: 0)${endColour}"
-        echo -e "  ${greenColour}❱ 0 ❰${endColour} ${redColour}Return${endColour}"
+        echo -e "  ${greenColour}❱ 1 ${endColour} ${purpleColour}ENABLE BORDERS${endColour}      ${grayColour}(Standard Width: 2)${endColour}"
+        echo -e "  ${greenColour}❱ 2 ${endColour} ${purpleColour}DISABLE BORDERS${endColour}     ${grayColour}(Clean/Full: 0)${endColour}"
+        echo -e "  ${greenColour}❱ 0 ${endColour} ${redColour}Return${endColour}"
 
         echo -ne "\n${limaColour}┌──(select${endColour}${grayColour}::${endColour}${purpleColour}borders${endColour}${limaColour})${endColour}"
-        echo -ne "\n${limaColour}└─${endColour}${greenColour}>>${endColour} "
+        echo -ne "\n${limaColour}└─${endColour}${greenColour}❱${endColour} "
         read bspwm_choice
 
         case $bspwm_choice in
@@ -682,7 +682,7 @@ function core_stabilization(){
         i=1
         for wall in "${wallpapers[@]}"; do
             filename=$(basename "$wall")
-            echo -e "  ${purpleColour}▌ $i ▐${endColour} ${grayColour}$filename${endColour}"
+            echo -e "  ${purpleColour}▌ $i ▐${endColour} ${greenColour}$filename${endColour}"
             let i++
         done
         
@@ -690,7 +690,7 @@ function core_stabilization(){
 
         # 4. Input del usuario
         echo -ne "\n${limaColour}┌──(select${endColour}${grayColour}::${endColour}${purpleColour}wallpaper${endColour}${limaColour})${endColour}"
-        echo -ne "\n${limaColour}└─${endColour}${greenColour}>>${endColour} "
+        echo -ne "\n${limaColour}└─${endColour}${greenColour}❱${endColour} "
         read choice
 
         # 5. Procesar selección
