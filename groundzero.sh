@@ -266,7 +266,7 @@ function full_installation(){
     echo -e "\n${turquoiseColour}$(for i in $(seq 1 45); do echo -n '='; done)[::] /// FULL INSTALLATION [::]$(for i in $(seq 1 44); do echo -n "="; done)${endColour}\n"
     
     # Verificamos internet antes de empezar nada
-    echo -e "${grayColour}[*] Checking connectivity...${endColour}"
+    echo -e "${lightBlueColour}[::] ACTION :: CHECKING CONNECTIVITY...${endColour}"
     wget -q --spider http://google.com
     if [ $? -ne 0 ]; then
         echo -e "\n${redColour}[!] No internet connection detected. Aborting.${endColour}\n"
@@ -572,12 +572,12 @@ function core_stabilization(){
                 # Validamos que el archivo fuente exista
                 if [ -f "dotfiles/picom/picom_quality" ]; then
                     cp -f dotfiles/picom/picom_quality ~/.config/picom/picom.conf
-                    echo -e "\n${limaColour}[*] Applying Aesthetic Mode...${endColour}"
+                    echo -e "\n${limaColour}[::] ACTION :: APPLYING AESTHETIC MODE${endColour}"
                     # REINICIO EN CALIENTE (HOT RELOAD)
                     killall picom 2>/dev/null
                     sleep 1
                     picom -b --config ~/.config/picom/picom.conf 2>/dev/null
-                    echo -e "${greenColour}[✔] Visuals updated.${endColour}"
+                    echo -e "${greenColour}[+] STATUS  :: Success${endColour}"
                 else
                     echo -e "\n${redColour}[!] Source file 'dotfiles/picom/picom_quality' not found.${endColour}"
                 fi
@@ -585,12 +585,12 @@ function core_stabilization(){
             2)
                 if [ -f "dotfiles/picom/picom_performance" ]; then
                     cp -f dotfiles/picom/picom_performance ~/.config/picom/picom.conf
-                    echo -e "\n${limaColour}[*] Applying Performance Mode...${endColour}"
+                    echo -e "\n${limaColour}[::] ACTION :: APPLYING PERFORMANCE MODE${endColour}"
                     # REINICIO EN CALIENTE
                     killall picom 2>/dev/null
                     sleep 1
                     picom -b --config ~/.config/picom/picom.conf 2>/dev/null
-                    echo -e "${greenColour}[✔] Performance optimized.${endColour}"
+                    echo -e "${greenColour}[+] STATUS  :: Success${endColour}"
                 else
                     echo -e "\n${redColour}[!] Source file not found.${endColour}"
                 fi
@@ -615,7 +615,7 @@ function core_stabilization(){
         case $bspwm_choice in
             1)
                 if [ -f "$BSPWM_CONFIG" ]; then
-                    echo -e "\n${limaColour}[*] Activating containment field (Borders)...${endColour}"
+                  echo -e "\n${limaColour}[::] ACTION :: ACTIVATING BORDERS (Width:2)${endColour}"
                     
                     # 1. SED QUIRÚRGICO:
                     # Busca la línea que configura el ancho y ponle '2'
@@ -624,14 +624,14 @@ function core_stabilization(){
                     # 2. HOT RELOAD (Aplicar cambios sin salir)
                     bspc wm -r 
                     
-                    echo -e "${greenColour}[✔] Borders enabled (Width: 2).${endColour}"
+                    echo -e "${greenColour}[+] STATUS  :: Success${endColour}"
                 else
                     echo -e "\n${redColour}[!] Critical: bspwmrc not found at $BSPWM_CONFIG${endColour}"
                 fi
                 ;;
             2)
                 if [ -f "$BSPWM_CONFIG" ]; then
-                    echo -e "\n${limaColour}[*] Deactivating containment field (No Borders)...${endColour}"
+                    echo -e "\n${limaColour}[::] ACTION :: REMOVING BORDERS (Width:0)${endColour}"
                     
                     # 1. SED QUIRÚRGICO:
                     # Busca la línea y ponle '0'
@@ -640,7 +640,7 @@ function core_stabilization(){
                     # 2. HOT RELOAD
                     bspc wm -r
                     
-                    echo -e "${greenColour}[✔] Borders removed (Clean Mode).${endColour}"
+                    echo -e "${greenColour}[+] STATUS  :: Success (Clean Mode)${endColour}"
                 else
                     echo -e "\n${redColour}[!] Critical: bspwmrc not found at $BSPWM_CONFIG${endColour}"
                 fi
@@ -707,7 +707,7 @@ function core_stabilization(){
             selected_wall="${wallpapers[$index]}"
             selected_name=$(basename "$selected_wall")
 
-            echo -e "\n${limaColour}[*] Deploying visual shield: $selected_name...${endColour}"
+            echo -e "\n${limaColour}[::] ACTION :: DEPLOYING VISUAL CONFIG: $selected_name...${endColour}"
 
             # A) CAMBIO INMEDIATO (Para que lo veas ya)
             feh --bg-fill "$selected_wall"
