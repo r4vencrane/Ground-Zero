@@ -624,6 +624,26 @@ function core_stabilization(){
     echo -e "${lightCyanColour}▌ 3 ▐${endColour} ${limaColour}Wallpapers"
   }
 
+  function select_options_core(){
+    echo -e "\n${limaColour}[+]${endColour} ${grayColour}Select an option:${endColour}\n"
+    options_core 
+    echo -ne "\n${purpleColour}[~]${endColour} ${grayColour}Install: ${endColour}"
+    read output_show
+
+    if [[ $output_show -eq 1 ]]; then
+      picom_modes
+    elif [[ $output_show -eq 2 ]]; then 
+      bspwm_config
+    elif [[ $output_show -eq 3 ]]; then 
+      set_wallpaper
+    else 
+      echo -e "\n${redColour}[!] You have to select a number! [1-3]${endColour}"
+    fi
+  
+  }
+
+  select_options
+
 
 
 }
