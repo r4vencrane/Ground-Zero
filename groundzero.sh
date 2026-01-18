@@ -541,8 +541,8 @@ function nvim_installation(){
     }
 
     # --- EJECUCIÓN ---
-    execute_process "install_nvim_binary" "Downloading & Installing Neovim Binary"
-    execute_process "deploy_nvchad_config" "Deploying NvChad Config (Auto-Backup)"
+    execute_process "install_nvim_binary" "Downloading & Installing Neovim Binary" | boxes -d stone
+    execute_process "deploy_nvchad_config" "Deploying NvChad Config (Auto-Backup)" | boxes -d stone 
 
     # Mensaje Final (Validando si boxes está instalado)
     echo -e "\n${turquoiseColour} /// NEOVIM SETUP COMPLETED \n${endColour}"
