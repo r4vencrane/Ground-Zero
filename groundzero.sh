@@ -491,7 +491,7 @@ EOF
 
 
 function nvim_installation(){
-    echo -e "\n${turquoiseColour} /// SYSTEM INSTALLATION :: NEOVIM ${endColour}\n"
+    echo -e "\n${turquoiseColour}$(for i in $(seq 1 43); do echo -n '='; done)[::] /// SYSTEM INSTALLATION :: NEOVIM [::]$(for i in $(seq 1 42); do echo -n "="; done)${endColour}\n"
 
     # --- Lógica 1: Instalación del Binario (Root) ---
     function install_nvim_binary(){
@@ -541,11 +541,11 @@ function nvim_installation(){
     }
 
     # --- EJECUCIÓN ---
-    execute_process "install_nvim_binary" "Downloading & Installing Neovim Binary" | boxes -d stone
-    execute_process "deploy_nvchad_config" "Deploying NvChad Config (Auto-Backup)" | boxes -d stone 
+    execute_process "install_nvim_binary" "Downloading & Installing Neovim Binary" 
+    execute_process "deploy_nvchad_config" "Deploying NvChad Config (Auto-Backup)"  
 
     # Mensaje Final (Validando si boxes está instalado)
-    echo -e "\n${turquoiseColour} /// NEOVIM SETUP COMPLETED \n${endColour}"
+    echo -e "\n${turquoiseColour}$(for i in $(seq 1 43); do echo -n '='; done)[::] /// NEOVIM SETUP COMPLETED [::]$(for i in $(seq 1 42); do echo -n "="; done)${endColour}\n"
     
     # Pequeño truco: Si 'boxes' no está instalado, usa 'cat' para que no de error el script
     if command -v boxes &> /dev/null; then
@@ -642,7 +642,7 @@ function core_stabilization(){
                     
                     echo -e "${gree/nColour}[::] STATUS :: SUCCESS (Clean Mode)${endColour}"
                 else
-                    echo -e "\n${redColour}[!] Critical: bspwmrc not found at $BSPWM_CONFIG${endColour}"
+                    echo -e "\n${redColour}[!] Critical: bspwmrc not found at $BSPW/M_CONFIG${endColour}"
                 fi
                 ;;
             0) return ;;
