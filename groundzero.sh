@@ -369,7 +369,7 @@ function pwnbox_mode(){
 }
 
 function phantom_terminal(){
-    echo -e "\n${turquoiseColour}$(printf '=%.0s' {1..35}) [::] PHANTOM TERMINAL [::] $(printf '=%.0s' {1..35})${endColour}\n"
+    echo -e "\n${turquoiseColour}$(printf '=%.0s' {1..40}) [::] PHANTOM TERMINAL [::] $(printf '=%.0s' {1..40})${endColour}\n"
     
     # 1. Aseguramos permisos (y validamos internet rápido)
     wget -q --spider http://google.com
@@ -485,13 +485,13 @@ EOF
     fi
 
     echo -e "\n${turquoiseColour}$(printf '=%.0s' {1..40}) [::] PHANTOM TERMINAL DEPLOYED [::] $(printf '=%.0s' {1..40})${endColour}\n"
-    echo -e "${purpleColour}[+]${endColour} ${limaColour} Restart your session or type 'zsh' to enter the void.${endColour}\n" | boxes -d stone 
+    echo -e "${purpleColour}[+]${endColour} ${limaColour} Open a new window of ${purpleColour}Kitty Terminal${endColour}${limaColour} to see the new changes.${endColour}" | boxes -d stone 
 }
 
 
 
 function nvim_installation(){
-    echo -e "\n${turquoiseColour}$(for i in $(seq 1 43); do echo -n '='; done)[::] /// SYSTEM INSTALLATION :: NEOVIM [::]$(for i in $(seq 1 36); do echo -n "="; done)${endColour}\n"
+    echo -e "\n${turquoiseColour}$(for i in $(seq 1 43); do echo -n '='; done)[::] /// SYSTEM INSTALLATION :: NEOVIM [::]$(for i in $(seq 1 34); do echo -n "="; done)${endColour}\n"
 
     # --- Lógica 1: Instalación del Binario (Root) ---
     function install_nvim_binary(){
