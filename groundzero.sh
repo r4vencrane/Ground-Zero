@@ -735,9 +735,10 @@ function core_stabilization(){
     # --- LOOP PRINCIPAL DEL MENÚ (CORE) ---
     while true; do
         clear
-        echo -e "\n${turquoiseColour}$(printf '=%.0s' {1..45})${endColour}"
-        echo -e "         C O R E   S T A B I L I Z A T I O N"
-        echo -e "${turquoiseColour}$(printf '=%.0s' {1..45})${endColour}\n"
+        echo -e "$banner" 
+        echo -e "\n${limaColour}$(printf '=%.0s' {1..120})${endColour}"
+        echo -e "\t\t\t\t\t  ${limaColour}C O R E   S T A B I L I Z E R"
+        echo -e "${limaColour}$(printf '=%.0s' {1..120})${endColour}\n"
 
         echo -e "${lightCyanColour}  ▌ 1 ▐${endColour} ${limaColour}Picom Compositor${endColour}   ${grayColour}(Blur & Performance)${endColour}"
         echo -e "${lightCyanColour}  ▌ 2 ▐${endColour} ${limaColour}Bspwm Borders${endColour}      ${grayColour}(Decorations)${endColour}"
