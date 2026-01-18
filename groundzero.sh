@@ -572,12 +572,12 @@ function core_stabilization(){
                 # Validamos que el archivo fuente exista
                 if [ -f "dotfiles/picom/picom_quality" ]; then
                     cp -f dotfiles/picom/picom_quality ~/.config/picom/picom.conf
-                    echo -e "\n${limaColour}[::] ACTION :: APPLYING AESTHETIC MODE${endColour}"
+                    echo -e "\n${limaColour}[::] ACTION :: APPLYING AESTHETIC MODE ${endColour}"
                     # REINICIO EN CALIENTE (HOT RELOAD)
                     killall picom 2>/dev/null
                     sleep 1
                     picom -b --config ~/.config/picom/picom.conf 2>/dev/null
-                    echo -e "${greenColour}[+] STATUS  :: Success${endColour}"
+                    echo -e "${greenColour}[::] STATUS :: SUCCESS${endColour}"
                 else
                     echo -e "\n${redColour}[!] Source file 'dotfiles/picom/picom_quality' not found.${endColour}"
                 fi
@@ -590,7 +590,7 @@ function core_stabilization(){
                     killall picom 2>/dev/null
                     sleep 1
                     picom -b --config ~/.config/picom/picom.conf 2>/dev/null
-                    echo -e "${greenColour}[+] STATUS  :: Success${endColour}"
+                    echo -e "${greenColour}[::] STATUS :: SUCCESS${endColour}"
                 else
                     echo -e "\n${redColour}[!] Source file not found.${endColour}"
                 fi
@@ -624,7 +624,7 @@ function core_stabilization(){
                     # 2. HOT RELOAD (Aplicar cambios sin salir)
                     bspc wm -r 
                     
-                    echo -e "${greenColour}[+] STATUS  :: Success${endColour}"
+                    echo -e "${greenColour}[::] STATUS :: SUCCESS${endColour}"
                 else
                     echo -e "\n${redColour}[!] Critical: bspwmrc not found at $BSPWM_CONFIG${endColour}"
                 fi
@@ -640,7 +640,7 @@ function core_stabilization(){
                     # 2. HOT RELOAD
                     bspc wm -r
                     
-                    echo -e "${gree/nColour}[+] STATUS  :: Success (Clean Mode)${endColour}"
+                    echo -e "${gree/nColour}[::] STATUS :: SUCCESS (Clean Mode)${endColour}"
                 else
                     echo -e "\n${redColour}[!] Critical: bspwmrc not found at $BSPWM_CONFIG${endColour}"
                 fi
@@ -722,7 +722,7 @@ function core_stabilization(){
                 echo "feh --bg-fill $selected_wall &" >> "$BSPWM_CONFIG"
             fi
 
-            echo -e "${greenColour}[✔] Background stabilized and saved.${endColour}"
+            echo -e "${greenColour}[::] STATUS :: SUCCESS${endColour}"
             
             # Pequeña pausa para apreciar el éxito
             sleep 1.5
