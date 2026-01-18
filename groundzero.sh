@@ -640,7 +640,7 @@ function core_stabilization(){
                     # 2. HOT RELOAD
                     bspc wm -r
                     
-                    echo -e "${greenColour}[+] STATUS  :: Success (Clean Mode)${endColour}"
+                    echo -e "${gree/nColour}[+] STATUS  :: Success (Clean Mode)${endColour}"
                 else
                     echo -e "\n${redColour}[!] Critical: bspwmrc not found at $BSPWM_CONFIG${endColour}"
                 fi
@@ -682,11 +682,11 @@ function core_stabilization(){
         i=1
         for wall in "${wallpapers[@]}"; do
             filename=$(basename "$wall")
-            echo -e "  ${purpleColour}▌ $i ▐${endColour} ${greenColour}$filename${endColour}"
+            echo -e "  ${limaColour}❱$i ${endColour} ${blueColour}$filename${endColour}"
             let i++
         done
         
-        echo -e "  ${purpleColour}▌ 0 ▐${endColour} ${redColour}Return${endColour}"
+        echo -e "  ${limaColour}❱ 0 ${endColour} ${redColour}Return${endColour}"
 
         # 4. Input del usuario
         echo -ne "\n${limaColour}┌──(select${endColour}${grayColour}::${endColour}${purpleColour}wallpaper${endColour}${limaColour})${endColour}"
@@ -749,9 +749,9 @@ function core_stabilization(){
         read core_choice
 
         case $core_choice in
-            1) picom_modes; echo -e "\n${grayColour}Press Enter to continue...${endColour}"; read ;;
-            2) bspwm_config; echo -e "\n${grayColour}Press Enter to continue...${endColour}"; read ;;
-            3) background_rads; echo -e "\n${grayColour}Press Enter to continue...${endColour}"; read ;;
+            1) picom_modes; echo -e "\n${lightCyanColour}// PRESS [ENTER] TO CONTINUE_${endColour}"; read ;;
+            2) bspwm_config; echo -e "\n${lightCyanColour}// PRESS [ENTER] TO CONTINUE_${endColour}"; read ;;
+            3) background_rads; echo -e "\n${lightCyanColour}// PRESS [ENTER] TO CONTINUE_${endColour}"; read ;;
             0) break ;; # Rompe el bucle y sale
             *) echo -e "\n${redColour}[!] Invalid Option.${endColour}"; sleep 1 ;;
         esac
@@ -808,7 +808,7 @@ function helpPanel(){
   echo -e "  ${turquoiseColour}-t${endColour}          ➜ ${grayColour}Phantom Terminal. Only CLI tools: ${greenColour}Zsh, Starship Powerline, Bat, Lsd, Kitty. ${endColour}"
   echo -e "  ${turquoiseColour}-p${endColour}          ➜ ${grayColour}Pwnbox Mode. ${greenColour}Target: HTB/Pwnbox Environment${endColour}"
   echo -e "  ${turquoiseColour}-n${endColour}          ➜ ${grayColour}Install Nvim with Nvchad${endColour}"
-  echo -e "  ${turquoiseColour}-c${endColour}          ➜ ${redColour}Core Stabilization${endColour}. ${purpleColour}(Interactive Menu)${endColour}"
+  echo -e "  ${turquoiseColour}-c${endColour}          ➜ ${redColour}Core Stabilizer${endColour}. ${purpleColour}(Interactive Menu)${endColour}"
   
   echo -e "\n${limaColour}[+]${endColour} ${grayColour}Examples:${endColour}"
   echo -e "\t${greenColour}./groundzero.sh -f${endColour} (Recommended for fresh installs)"
