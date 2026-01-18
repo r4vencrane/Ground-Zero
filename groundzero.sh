@@ -682,7 +682,7 @@ function core_stabilization(){
         i=1
         for wall in "${wallpapers[@]}"; do
             filename=$(basename "$wall")
-            echo -e "  ${limaColour}❱$i ${endColour} ${blueColour}$filename${endColour}"
+            echo -e "  ${limaColour}❱ $i ${endColour} ${blueColour}$filename${endColour}"
             let i++
         done
         
