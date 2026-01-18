@@ -484,14 +484,14 @@ EOF
         sudo chsh -s /usr/bin/zsh "$USER" > /dev/null 2>&1
     fi
 
-    echo -e "\n${greenColour}[✔] Phantom Terminal Deployed.${endColour}"
-    echo -e "${grayColour}    Restart your session or type 'zsh' to enter the void.${endColour}\n"
+    echo -e "\n${turquoiseColour}$(printf '=%.0s' {1..40}) [::] PHANTOM TERMINAL DEPLOYED [::] $(printf '=%.0s' {1..40})${endColour}\n"
+    echo -e "${purpleColour}[+]${endColour} ${limaColour} Restart your session or type 'zsh' to enter the void.${endColour}\n" | boxes -d stone 
 }
 
 
 
 function nvim_installation(){
-    echo -e "\n${turquoiseColour}$(for i in $(seq 1 43); do echo -n '='; done)[::] /// SYSTEM INSTALLATION :: NEOVIM [::]$(for i in $(seq 1 42); do echo -n "="; done)${endColour}\n"
+    echo -e "\n${turquoiseColour}$(for i in $(seq 1 43); do echo -n '='; done)[::] /// SYSTEM INSTALLATION :: NEOVIM [::]$(for i in $(seq 1 36); do echo -n "="; done)${endColour}\n"
 
     # --- Lógica 1: Instalación del Binario (Root) ---
     function install_nvim_binary(){
@@ -549,9 +549,9 @@ function nvim_installation(){
     
     # Pequeño truco: Si 'boxes' no está instalado, usa 'cat' para que no de error el script
     if command -v boxes &> /dev/null; then
-        echo -e "${limaColour}[+] Use '${purpleColour}nvim${endColour}${limaColour}' to start. First launch will install plugins automatically.${endColour}" | boxes -d stone
+        echo -e "${purpleColour}[+]${endColour} ${limaColour}Use '${purpleColour}nvim${endColour}${limaColour}' to start. First launch will install plugins automatically.${endColour}" | boxes -d stone
     else
-        echo -e "${purpleColour}[+] ${limaColour}Use 'nvim' to start. First launch will install plugins automatically.${endColour}"
+        echo -e "${purpleColour}[+]${endColour} ${limaColour}Use 'nvim' to start. First launch will install plugins automatically.${endColour}"
     fi
 }
 function core_stabilization(){
