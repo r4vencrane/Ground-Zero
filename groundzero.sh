@@ -369,7 +369,7 @@ function pwnbox_mode(){
 }
 
 function phantom_terminal(){
-    echo -e "\n${turquoiseColour}$(printf '=%.0s' {1..40}) [::] PHANTOM TERMINAL [::] $(printf '=%.0s' {1..40})${endColour}\n"
+    echo -e "\n${turquoiseColour}$(printf '=%.0s' {1..40}) [::] PHANTOM TERMINAL [::] $(printf '=%.0s' {1..45})${endColour}\n"
     
     # 1. Aseguramos permisos (y validamos internet rápido)
     wget -q --spider http://google.com
@@ -484,7 +484,7 @@ EOF
         sudo chsh -s /usr/bin/zsh "$USER" > /dev/null 2>&1
     fi
 
-    echo -e "\n${turquoiseColour}$(printf '=%.0s' {1..40}) [::] PHANTOM TERMINAL DEPLOYED [::] $(printf '=%.0s' {1..40})${endColour}\n"
+    echo -e "\n${turquoiseColour}$(printf '=%.0s' {1..40}) [::] PHANTOM TERMINAL DEPLOYED [::] $(printf '=%.0s' {1..39})${endColour}\n"
     echo -e "${purpleColour}[+]${endColour} ${limaColour} Open a new window of ${purpleColour}Kitty Terminal${endColour}${limaColour} to see the new changes.${endColour}" | boxes -d stone 
 }
 
