@@ -640,9 +640,9 @@ function core_stabilization(){
                     # 2. HOT RELOAD
                     bspc wm -r
                     
-                    echo -e "${gree/nColour}[::] STATUS :: SUCCESS (Clean Mode)${endColour}"
+                    echo -e "${greenColour}[::] STATUS :: SUCCESS (Clean Mode)${endColour}"
                 else
-                    echo -e "\n${redColour}[!] Critical: bspwmrc not found at $BSPW/M_CONFIG${endColour}"
+                    echo -e "\n${redColour}[!] Critical: bspwmrc not found at $BSPWM_CONFIG ${endColour}"
                 fi
                 ;;
             0) return ;;
@@ -716,7 +716,9 @@ function core_stabilization(){
             # Usamos '|' como separador en sed porque las rutas tienen '/'
             if grep -q "feh --bg-fill" "$BSPWM_CONFIG"; then
                 # Si la línea existe, la reemplazamos
-                sed -i "s|feh --bg-fill .*|feh --bg-fill $selected_wall &|g" "$BSPWM_CONFIG"
+                #sed -i "s|feh --bg-fill .*|feh --bg-fill $selected_wall &|g" "$BSPWM_CONFIG"
+                # Nota la barra invertida antes del & (\&)
+                sed -i "s|feh --bg-fill .*|feh --bg-fill $selected_wall \&|g" "$BSPWM_CONFIG"
             else
                 # Si no existe, la agregamos al final
                 echo "feh --bg-fill $selected_wall &" >> "$BSPWM_CONFIG"
